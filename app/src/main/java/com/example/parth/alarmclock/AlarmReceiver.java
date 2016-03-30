@@ -22,10 +22,10 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         Log.v(LOG_TAG, "Going to call ringing activity");
         alarmIntend.putExtras(bundle);
         alarmIntend.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //context.startService(alarmIntend);
         //startWakefulService(context, alarmIntend);
+
         context.startActivity(alarmIntend);
-        //alarmCallFunction(alarmIntend);
+
 
     }
 }

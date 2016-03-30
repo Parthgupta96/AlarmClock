@@ -4,9 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,8 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,27 +28,41 @@ public class MainActivity extends AppCompatActivity {
     public static TimePicker time;
     static int hours;
     static int min;
+    static Button OkButton;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
     AlarmManager alarmManager;
+    TimeSelection selectTime;
+    CoordinatorLayout coordinatorLayout;
+    TextView addAlarm;
+    ListView listView;
+    String string;
+
+    alarmAdapter mAlarmAdapter;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView.Adapter mAdapter;
-    private TimePicker alarmTime;
-    static Button OkButton;
     private PendingIntent pendingIntent;
-    TimeSelection selectTime;
+    private FrameLayout frameLayout;
+    private ArrayList<String> AlarmList;
 
+    //TODO CHANGE FRAME TO COORDINATOR
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mRecyclerView = (RecyclerView) findViewById(R.id.alarm_list);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new alarmAdapter();
+//        mRecyclerView = (RecyclerView) findViewById(R.id.alarm_list);
+//        mRecyclerView.setHasFixedSize(true);
+      //  mLayoutManager = new LinearLayoutManager(this);
+        AlarmList = new ArrayList<>();
+         string ="hi";
+      //  mRecyclerView.setLayoutManager(mLayoutManager);
+        //mAdapter = new alarmAdapter();
+        addAlarm = (TextView)findViewById(R.id.AddAlarm);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
+        // frameLayout = (FrameLayout)findViewById(R.id.coordinatorView);
+        listView = (ListView) findViewById(R.id.ListView);
 
-        alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -55,25 +74,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    public void cancel(View view){
+
+    public void cancel(View view) {
         selectTime.dismiss();
     }
 
-    public  void addAlarm(View view) {
-        Log.v(LOG_TAG, "After ok pressed value of hour "+hours + Calendar.HOUR_OF_DAY);
+
+    public void addAlarm(View view) {
+        hours = time.getCurrentHour();
+        min = time.getCurrentMinute();
+        AlarmList.add(hours + ":" + min);
+        addAlarm.setVisibility(View.GONE);
+
+        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, string);
+        listView.setAdapter(mAlarmAdapter);
+
+        Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
         String dialog = "Alarm Set for ";
         selectTime.dismiss();
         Calendar calendar = Calendar.getInstance();
+        // Log.v(LOG_TAG,"current time"+calendar.get(Calendar.HOUR_OF_DAY)+" "+calendar.get(Calendar.MINUTE));
+        int MinDiff = min - calendar.get(Calendar.MINUTE);
+        int HourDiff = 0;
+        if (MinDiff < 0) {
+            MinDiff += 60;
+            HourDiff = -1;
+        }
+        HourDiff = HourDiff + hours - calendar.get(Calendar.HOUR_OF_DAY);
+        if (HourDiff < 0) {//TODO change for next day
+            HourDiff = 12 + HourDiff;
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-        int HourDiff = hours - Calendar.HOUR_OF_DAY;
-        int MinDiff = min - Calendar.MINUTE;
+        }
 
-//        dialog = dialog+HourDiff+" Hours and "+MinDiff+" Minutes";
-//        Toast.makeText(this, dialog, Toast.LENGTH_SHORT).show();
+        dialog = dialog + HourDiff + " Hours and " + MinDiff + " Minutes";
+        Snackbar.make(coordinatorLayout, dialog, Snackbar.LENGTH_LONG).show();
+        //Toast.makeText(this, dialog, Toast.LENGTH_SHORT).show();
 
         calendar.set(Calendar.HOUR_OF_DAY, hours);
         calendar.set(Calendar.MINUTE, min);
-        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.SECOND, 000);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
