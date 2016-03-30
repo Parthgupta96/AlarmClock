@@ -16,17 +16,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#CCCCCC"
-            />
-
         <TextView
             android:id="@+id/alarmTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Time" />
+            android:text="Time"
+            android:textSize="60dp"/>
     </LinearLayout>
 
 

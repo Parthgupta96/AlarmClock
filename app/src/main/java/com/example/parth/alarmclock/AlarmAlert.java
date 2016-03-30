@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -16,7 +17,7 @@ import java.io.IOException;
 
 public class AlarmAlert extends AppCompatActivity {
 
-    private MediaPlayer mediaPlayer;
+    public MediaPlayer mediaPlayer;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
 
     @Override
@@ -43,10 +44,6 @@ public class AlarmAlert extends AppCompatActivity {
         mediaPlayer.start();
     }
 
-    protected void closeAlarm(){
-        mediaPlayer.stop();     //on clicking button
-    }
-
     protected void unlockScreen(){
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
@@ -54,6 +51,14 @@ public class AlarmAlert extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+    }
+
+    public void closeAlarm(View view){
+        Log.v(LOG_TAG, "will now stop");
+        mediaPlayer.stop();
+        Log.v(LOG_TAG, "will now release");
+        mediaPlayer.release();
+        this.finish();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

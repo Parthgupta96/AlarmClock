@@ -17,13 +17,15 @@ import java.util.ArrayList;
 
 public class alarmAdapter extends ArrayAdapter<String> {
   private ArrayList<String> alarmList;
-    String string;
+    String[] string;
+    Context c;
 
-    public alarmAdapter(Context context,int resource,String AlarmList) {
-        super(context, resource);
+    public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList) {
+        super(context, R.layout.alarm_list_view, R.id.alarmTime, AlarmList);
        // alarmList = AlarmList;
         Log.v("error","in const");
-        string = AlarmList;
+        this.alarmList = AlarmList;
+        this.c = context;
     }
 
 
@@ -42,18 +44,22 @@ public class alarmAdapter extends ArrayAdapter<String> {
         if(convertView==null){
             Log.v("error","in get view");
              vh = new ViewHolder();
-            LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
-            convertView = vi.inflate(R.layout.alarm_list_view, null);
-            vh.alarmTime = (TextView)convertView.findViewById(R.id.alarmTime);
-            vh.OnOff = (CheckBox)convertView.findViewById(R.id.onOffButton);
+            LayoutInflater vi = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+           // vi = LayoutInflater.from(getContext());
+            view = vi.inflate(R.layout.alarm_list_view, parent, false);
+            vh.alarmTime = (TextView)view.findViewById(R.id.alarmTime);
+            vh.OnOff = (CheckBox)view.findViewById(R.id.onOffButton);
+
+            view.setTag(vh);
         }
+        else
+            vh = (ViewHolder)view.getTag();
 
-        vh.alarmTime.setText("hi");
+        vh.alarmTime.setText(alarmList.get(position));
         vh.OnOff.setChecked(true);
 
-        return convertView;
+        return view;
     }
 //
 //    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
