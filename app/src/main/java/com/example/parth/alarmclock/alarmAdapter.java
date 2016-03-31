@@ -17,14 +17,15 @@ import java.util.ArrayList;
 
 public class alarmAdapter extends ArrayAdapter<String> {
   private ArrayList<String> alarmList;
-    String[] string;
-    Context c;
+  private ArrayList<String> alarmNameList;
+  Context c;
 
-    public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList) {
+    public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList, ArrayList<String> AlarmNameList) {
         super(context, R.layout.alarm_list_view, R.id.alarmTime, AlarmList);
        // alarmList = AlarmList;
         Log.v("error","in const");
         this.alarmList = AlarmList;
+        this.alarmNameList = AlarmNameList;
         this.c = context;
     }
 
@@ -32,6 +33,7 @@ public class alarmAdapter extends ArrayAdapter<String> {
     public static class ViewHolder{
         //CardView cv;
         TextView alarmTime;
+        TextView alarmName;
         CheckBox OnOff;
 
     }
@@ -49,6 +51,7 @@ public class alarmAdapter extends ArrayAdapter<String> {
            // vi = LayoutInflater.from(getContext());
             view = vi.inflate(R.layout.alarm_list_view, parent, false);
             vh.alarmTime = (TextView)view.findViewById(R.id.alarmTime);
+            vh.alarmName = (TextView)view.findViewById(R.id.alarmName);
             vh.OnOff = (CheckBox)view.findViewById(R.id.onOffButton);
 
             view.setTag(vh);
@@ -57,6 +60,7 @@ public class alarmAdapter extends ArrayAdapter<String> {
             vh = (ViewHolder)view.getTag();
 
         vh.alarmTime.setText(alarmList.get(position));
+        vh.alarmName.setText(alarmNameList.get(position));
         vh.OnOff.setChecked(true);
 
         return view;

@@ -11,10 +11,26 @@
         android:layout_centerHorizontal="true"
         android:visibility="visible" />
 
+    <Switch
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/vibrateButton"
+        android:text="Vibrate"
+        android:textOff="Off"
+        android:textOn="On"
+        android:layout_below="@id/timePicker"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vibrateButton"
+        android:hint="Alarm Label"
+        android:id="@+id/alarmName"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/timePicker"
+        android:layout_below="@id/alarmName"
         android:orientation="horizontal">
 
         <Button

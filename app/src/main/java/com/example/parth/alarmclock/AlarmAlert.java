@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,6 +19,7 @@ import java.io.IOException;
 public class AlarmAlert extends AppCompatActivity {
 
     public MediaPlayer mediaPlayer;
+    Vibrator vibrator;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
 
     @Override
@@ -42,6 +44,10 @@ public class AlarmAlert extends AppCompatActivity {
         }
 
         mediaPlayer.start();
+
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        long[] pattern = { 1000, 200, 200, 200 };
+        vibrator.vibrate(pattern, 0);
     }
 
     protected void unlockScreen(){
@@ -56,6 +62,7 @@ public class AlarmAlert extends AppCompatActivity {
     public void closeAlarm(View view){
         Log.v(LOG_TAG, "will now stop");
         mediaPlayer.stop();
+        vibrator.cancel();
         Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
         this.finish();

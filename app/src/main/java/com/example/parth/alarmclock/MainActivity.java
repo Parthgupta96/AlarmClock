@@ -14,7 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -32,8 +34,11 @@ public class MainActivity extends AppCompatActivity {
     CoordinatorLayout coordinatorLayout;
     TextView addAlarm;
     ListView listView;
+    static Switch vibrationSwitch;
+    static EditText alarmLabel;
+    String text = "";
 
-    Alarm alarm;
+    Alarm alarm = new Alarm();
 
     alarmAdapter mAlarmAdapter;
     private RecyclerView mRecyclerView;
@@ -41,18 +46,21 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<String> AlarmList;
+    private ArrayList<String> AlarmNameList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        alarm = new Alarm();
         AlarmList = new ArrayList<>();
+        AlarmNameList = new ArrayList<>();
         addAlarm = (TextView)findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
         listView = (ListView) findViewById(R.id.ListView);
         alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -65,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     public void cancel(View view) {
 
@@ -80,12 +89,16 @@ public class MainActivity extends AppCompatActivity {
 
         alarm.setAlarm(hours, min, coordinatorLayout);
 
+        text = alarmLabel.getText().toString();
+        alarm.setAlarmName(text);
+        Log.v(LOG_TAG, "after alarm name set");
         alarm.setTimeInString();
         AlarmList.add(alarm.getTimeInString());
+        AlarmNameList.add(alarm.getAlarmName());
 
         addAlarm.setVisibility(View.GONE);
 
-        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, AlarmList);
+        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, AlarmList, AlarmNameList);
         listView.setAdapter(mAlarmAdapter);
 
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
@@ -95,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
         Log.v(LOG_TAG, "Setting alarm");
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+
+        alarm.setIsVibrate(vibrationSwitch.isChecked());
     }
 
     public void addNewAlarm() {

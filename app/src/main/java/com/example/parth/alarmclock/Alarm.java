@@ -58,8 +58,8 @@ public class Alarm {
         isActive = (!isActive);
     }
 
-    void setIsVibrate(){
-        isVibrate = (!isVibrate);
+    void setIsVibrate(boolean state){
+        isVibrate = state;
     }
 
     void setAlarmId(int id){
@@ -68,6 +68,7 @@ public class Alarm {
 
     void setAlarmName(String name){
         this.alarmName = name;
+        Log.v(LOG_TAG, "alarm name set" + alarmName);
     }
 
     void setRingtonePath(String path){
