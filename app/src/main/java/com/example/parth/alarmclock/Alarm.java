@@ -21,91 +21,100 @@ public class Alarm {
     private int hour;
     private int min;
     private String alarmName;
-    private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();;
+    private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
+    ;
     private String timeInString;
-    private String snackbarDialog = "Alarm set for ";
+    private String snackbarDialog;
+    private int timeDifference[] = new int[2];
 
 
-    Boolean getIsActive(){
+    Boolean getIsActive() {
         return isActive;
     }
 
-    Boolean getIsVibrate(){
+    Boolean getIsVibrate() {
         return isVibrate;
     }
 
-    int getAlarmId(){
+    int getAlarmId() {
         return alarmId;
     }
 
-    String getAlarmName(){
+    String getAlarmName() {
         return alarmName;
     }
 
-    String getRingtonePath(){
+    String getRingtonePath() {
         return ringtonePath;
     }
 
-    String getTimeInString(){
+    String getTimeInString() {
         return timeInString;
     }
 
-    Calendar getCalendar(){
+    Calendar getCalendar() {
         return calendar;
     }
 
-    void setIsActive(){
+    void setIsActive() {
         isActive = (!isActive);
     }
 
-    void setIsVibrate(boolean state){
+    void setIsVibrate(boolean state) {
         isVibrate = state;
     }
 
-    void setAlarmId(int id){
+    void setAlarmId(int id) {
         this.alarmId = id;
     }
 
-    void setAlarmName(String name){
+    void setAlarmName(String name) {
         this.alarmName = name;
         Log.v(LOG_TAG, "alarm name set" + alarmName);
     }
 
-    void setRingtonePath(String path){
+    void setRingtonePath(String path) {
         ringtonePath = path;
     }
 
-    void setTimeInString(){
-        if(min>9)
+    void setTimeInString() {
+        if (min > 9)
             timeInString = hour + " : " + min;
-        else{
+        else {
             timeInString = hour + " : 0" + min;
         }
     }
 
-    void setAlarm(int hour, int min, CoordinatorLayout coordinatorLayout) {
+    void calcTimeDifference(int alarmHr, int alarmMin) {
+        //timeDifference[0] is hours
+        Calendar calendar = Calendar.getInstance();
+        int currentMin = calendar.get(Calendar.MINUTE);
+        int currentHr = calendar.get(Calendar.HOUR_OF_DAY);
+        timeDifference[1] = alarmMin - currentMin;
 
+        if (timeDifference[1] < 0) {
+            timeDifference[1] += 60;
+            timeDifference[0] = -1;
+        }
+        timeDifference[0] += alarmHr - currentHr;
+
+        if (currentHr > alarmHr || (currentHr == alarmHr && currentMin > alarmMin)) {//alarm for next day
+            timeDifference[0] +=24 ;
+            this.calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+    }
+
+    void setAlarm(int hour, int min, CoordinatorLayout coordinatorLayout) {
+        snackbarDialog = "Alarm set for ";
         this.hour = hour;
         this.min = min;
         calendar = Calendar.getInstance();
+        calcTimeDifference(hour, min);
 
-        int MinDiff = min - calendar.get(Calendar.MINUTE);
-        int HourDiff = 0;
-        if (MinDiff < 0) {
-            MinDiff += 60;
-            HourDiff = -1;
-        }
-        HourDiff = HourDiff + hour - calendar.get(Calendar.HOUR_OF_DAY);
-        if (HourDiff < 0) {//TODO change for next day
-            HourDiff = 12 + HourDiff;
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-        }
-        Log.v(LOG_TAG, "diff" + MinDiff);
-        Log.v(LOG_TAG, "diff" + HourDiff);
-        this.snackbarDialog = this.snackbarDialog + HourDiff + " Hours and " + MinDiff + " Minutes";
+        this.snackbarDialog = this.snackbarDialog + timeDifference[0] + " Hours and " + timeDifference[1] + " Minutes";
         Snackbar.make(coordinatorLayout, this.snackbarDialog, Snackbar.LENGTH_LONG).show();
-
+        timeDifference[0] = timeDifference[1] = 0;
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 000);
