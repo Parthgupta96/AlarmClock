@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static TimePicker time;
     static int hours;
     static int min;
+    static int miliseconds;
     static Button OkButton;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
     AlarmManager alarmManager;

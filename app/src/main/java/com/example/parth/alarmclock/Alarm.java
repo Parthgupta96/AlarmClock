@@ -20,6 +20,7 @@ public class Alarm {
     private int alarmId;
     private int hour;
     private int min;
+    private long miliseconds;
     private String alarmName;
     private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();;
     private String timeInString;
@@ -89,6 +90,7 @@ public class Alarm {
         this.min = min;
         calendar = Calendar.getInstance();
 
+
         int MinDiff = min - calendar.get(Calendar.MINUTE);
         int HourDiff = 0;
         if (MinDiff < 0) {
@@ -110,6 +112,9 @@ public class Alarm {
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 000);
 
+        miliseconds = calendar.getTimeInMillis();
+        Log.v(LOG_TAG, "" + miliseconds);
+        //Toast.makeText(, "" + miliseconds)
 
     }
 
