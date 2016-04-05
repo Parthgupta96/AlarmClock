@@ -29,8 +29,6 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, version);
     }
 
-    public void
-
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(createTable);

@@ -12,6 +12,14 @@ import android.widget.TimePicker;
 
 public class TimeSelection extends DialogFragment{
 
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+//        int style = DialogFragment.STYLE_NORMAL, theme = 0;
+//        theme = android.R.style.Widget_Material_Light_TimePicker;
+//        setStyle(style,theme);
+
+    }
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
 

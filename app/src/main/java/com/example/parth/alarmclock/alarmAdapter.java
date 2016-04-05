@@ -22,8 +22,6 @@ public class alarmAdapter extends ArrayAdapter<String> {
 
     public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList, ArrayList<String> AlarmNameList) {
         super(context, R.layout.alarm_list_view, R.id.alarmTime, AlarmList);
-       // alarmList = AlarmList;
-        Log.v("error","in const");
         this.alarmList = AlarmList;
         this.alarmNameList = AlarmNameList;
         this.c = context;
@@ -31,7 +29,7 @@ public class alarmAdapter extends ArrayAdapter<String> {
 
 
     public static class ViewHolder{
-        //CardView cv;
+
         TextView alarmTime;
         TextView alarmName;
         CheckBox OnOff;
@@ -59,25 +57,11 @@ public class alarmAdapter extends ArrayAdapter<String> {
         else
             vh = (ViewHolder)view.getTag();
 
+
         vh.alarmTime.setText(alarmList.get(position));
         vh.alarmName.setText(alarmNameList.get(position));
         vh.OnOff.setChecked(true);
 
         return view;
     }
-//
-//    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//
-//        return null;
-//    }
-//
-//
-//    public int getItemCount() {
-//        return 0;
-//    }
-//
-//
-//    public void onBindViewHolder(ViewHolder holder, int position) {
-//
-//    }
 }
