@@ -12,7 +12,7 @@ import java.util.Calendar;
  */
 public class Alarm {
 
-    public final String LOG_TAG = MainActivity.class.getSimpleName();
+    public final String LOG_TAG = Alarm.class.getSimpleName();
 
     private Calendar calendar;
     private Boolean isActive = true;
@@ -32,6 +32,9 @@ public class Alarm {
     Boolean getIsActive() {
         return isActive;
     }
+
+    int getHour(){return hour;}
+    int getMin(){return min;}
 
     Boolean getIsVibrate() {
         return isVibrate;
@@ -61,6 +64,10 @@ public class Alarm {
         isActive = (!isActive);
     }
 
+    void setIsActive(Boolean status) {
+        isActive = status;
+    }
+
     void setIsVibrate(boolean state) {
         isVibrate = state;
     }
@@ -77,6 +84,15 @@ public class Alarm {
     void setRingtonePath(String path) {
         ringtonePath = path;
     }
+
+    void setHour(int hour){
+        this.hour = hour;
+    }
+
+    void setMin(int min){
+        this.min = min;
+    }
+
 
     void setTimeInString() {
         if (min > 9)

@@ -3,6 +3,7 @@ package com.example.parth.alarmclock;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -26,37 +27,70 @@ public class MainActivity extends AppCompatActivity {
     public static TimePicker time;
     static int hours;
     static int min;
-
+    static Switch vibrationSwitch;
+    static EditText alarmLabel;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
     AlarmManager alarmManager;
     TimeSelection selectTime;
     CoordinatorLayout coordinatorLayout;
     TextView addAlarm;
     ListView listView;
-    static Switch vibrationSwitch;
-    static EditText alarmLabel;
     String text = "";
+    Cursor cursor;
+    AlarmDatabase alarmDatabase;
+    Alarm alarm;
 
-    Alarm alarm ;
+
+    int isActiveIndex ;
+    int isVibrateIndex ;
+    int HourIndex ;
+    int MinIndex ;
+    int AlarmNameIndex;
+    int RingtonePathIndex;
+
 
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
-    private ArrayList<String> AlarmList;
-    private ArrayList<String> AlarmNameList;
+    private ArrayList<Alarm> alarmsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        alarm = new Alarm();
-        AlarmList = new ArrayList<>();
-        AlarmNameList = new ArrayList<>();
-        addAlarm = (TextView)findViewById(R.id.AddAlarm);
+        alarmsList = new ArrayList<>();
+
+//        AlarmList = new ArrayList<>();
+//        AlarmNameList = new ArrayList<>();
+
+        addAlarm = (TextView) findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
         listView = (ListView) findViewById(R.id.ListView);
-        alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
 
+        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime,alarmsList);
+        listView.setAdapter(mAlarmAdapter);
 
+        alarmDatabase = new AlarmDatabase(this);
+        cursor = alarmDatabase.getCursor();
+
+        if(cursor!=null){
+            while(cursor.moveToNext()){
+                alarm = new Alarm();
+                 isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                 isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                 HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                 MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                 AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                 RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+
+                alarm.setIsActive(1==cursor.getInt(isActiveIndex));
+                alarm.setIsVibrate(1==cursor.getInt(isVibrateIndex));
+                alarm.setHour(cursor.getInt(HourIndex));
+                alarm.setMin(cursor.getInt(MinIndex));
+                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
+                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
+                alarm.setTimeInString();
+            }
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -68,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 addNewAlarm();
             }
         });
+
+
+
     }
 
 
@@ -78,35 +115,39 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void addAlarm(View view) {
-
-
-        hours = time.getCurrentHour();
-        min = time.getCurrentMinute();
-
-        alarm.setAlarm(hours, min, coordinatorLayout);
-
-        text = alarmLabel.getText().toString();
-        alarm.setAlarmName(text);
-
-        Log.v(LOG_TAG, "after alarm name set");
-        alarm.setTimeInString();
-        AlarmList.add(alarm.getTimeInString());
-        AlarmNameList.add(alarm.getAlarmName());
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         addAlarm.setVisibility(View.GONE);
+        alarm = new Alarm();
 
-        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, AlarmList, AlarmNameList);
-        listView.setAdapter(mAlarmAdapter);
+        //get entered Time
+        hours = time.getCurrentHour();
+        min = time.getCurrentMinute();
+        text = alarmLabel.getText().toString();
+        Log.v(LOG_TAG, "after alarm name set");
+
+        alarm.setAlarm(hours, min, coordinatorLayout);
+        alarm.setAlarmName(text);
+        alarm.setTimeInString();
+        alarm.setIsVibrate(vibrationSwitch.isChecked());
+        alarm.setIsActive(Boolean.TRUE);
+        //alarm.setRingtonePath();
+
+        mAlarmAdapter.notifyDataSetChanged();
+        alarmsList.add(alarm);
+
 
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
-        selectTime.dismiss();
+
+        //database
+           // alarmDatabase.insertToDB(alarm);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
-        Log.v(LOG_TAG, "Setting alarm");
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+        alarmDatabase.viewData(this);
+        selectTime.dismiss();
 
-        alarm.setIsVibrate(vibrationSwitch.isChecked());
     }
 
     public void addNewAlarm() {
@@ -114,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         selectTime.show(getFragmentManager(), "Time Picker");
     }
 
-    protected void closeAlarm(View view){
+    protected void closeAlarm(View view) {
 
 
     }
