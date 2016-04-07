@@ -73,22 +73,29 @@ public class MainActivity extends AppCompatActivity {
         cursor = alarmDatabase.getCursor();
 
         if(cursor!=null){
+            addAlarm.setVisibility(View.GONE);
+
             while(cursor.moveToNext()){
                 alarm = new Alarm();
-                 isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                 isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                 HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                 MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                 AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                 RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
 
-                alarm.setIsActive(1==cursor.getInt(isActiveIndex));
+                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
+                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
+                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
+                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+
+                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+
+                alarm.setIsActive(1== cursor.getInt(isActiveIndex));
                 alarm.setIsVibrate(1==cursor.getInt(isVibrateIndex));
                 alarm.setHour(cursor.getInt(HourIndex));
                 alarm.setMin(cursor.getInt(MinIndex));
                 alarm.setAlarmName(cursor.getString(AlarmNameIndex));
                 alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
                 alarm.setTimeInString();
+
+                alarmsList.add(alarm);
+
             }
         }
 
@@ -140,11 +147,12 @@ public class MainActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
         //database
-           // alarmDatabase.insertToDB(alarm);
+            alarmDatabase.insertToDB(alarm);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+
         alarmDatabase.viewData(this);
         selectTime.dismiss();
 
