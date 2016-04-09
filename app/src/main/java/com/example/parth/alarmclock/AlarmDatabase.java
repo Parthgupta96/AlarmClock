@@ -70,6 +70,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         int HourIndex ;
         int MinIndex ;
         int AlarmNameIndex;
+        int ringtonePathIndex;
         String string = "";
         while(cursor.moveToNext()){
 
@@ -78,9 +79,11 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
             MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
             AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+            ringtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
 
             string =string+ cursor.getString(AlarmNameIndex)+"\t"
-                    +cursor.getInt(HourIndex)+":"+cursor.getInt(MinIndex)+"\n";
+                    +cursor.getInt(HourIndex)+":"+cursor.getInt(MinIndex)+"\t"
+                    +string+ cursor.getString(ringtonePathIndex)+"\n";
         }
         Toast.makeText(context, string, Toast.LENGTH_LONG).show();
     }

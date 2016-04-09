@@ -30,10 +30,18 @@
         android:hint="Alarm Label"
         android:id="@+id/alarmName"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Change Alarm Tone"
+        android:id="@+id/ringtonePathPicker"
+        android:layout_below="@id/alarmName"
+        android:onClick="ringtonePath"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/alarmName"
+        android:layout_below="@id/ringtonePathPicker"
         android:orientation="horizontal">
 
         <Button

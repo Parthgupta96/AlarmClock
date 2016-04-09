@@ -4,6 +4,8 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     static int min;
     static Switch vibrationSwitch;
     static EditText alarmLabel;
+    static Button ringtonePathChanger;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
     AlarmManager alarmManager;
     TimeSelection selectTime;
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     Cursor cursor;
     AlarmDatabase alarmDatabase;
     Alarm alarm;
-
+    Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
     int isActiveIndex ;
     int isVibrateIndex ;
@@ -47,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     int MinIndex ;
     int AlarmNameIndex;
     int RingtonePathIndex;
-
 
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
@@ -109,11 +112,25 @@ public class MainActivity extends AppCompatActivity {
                 addNewAlarm();
             }
         });
-
-
-
     }
 
+    public void ringtonePath(View view){
+        final Uri currentTone= RingtoneManager.getActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_ALARM);
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, currentTone);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            ringtone = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+        }
+    }
 
     public void cancel(View view) {
 
@@ -138,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         alarm.setTimeInString();
         alarm.setIsVibrate(vibrationSwitch.isChecked());
         alarm.setIsActive(Boolean.TRUE);
-        //alarm.setRingtonePath();
+        alarm.setRingtonePath(ringtone.toString());
 
         mAlarmAdapter.notifyDataSetChanged();
         alarmsList.add(alarm);
