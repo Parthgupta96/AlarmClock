@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 /**
  * Created by Priyanshu on 02-04-2016.
  */
@@ -87,6 +89,41 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         }
         Toast.makeText(context, string, Toast.LENGTH_LONG).show();
     }
+
+    public ArrayList<Alarm> getAllAlarms(){
+        Cursor cursor = getCursor();
+        ArrayList<Alarm> allAlarms = new ArrayList<>();
+        int isActiveIndex ;
+        int isVibrateIndex ;
+        int HourIndex ;
+        int MinIndex ;
+        int AlarmNameIndex;
+        int ringtonePathIndex;
+        int id;
+        String string = "";
+        cursor.moveToFirst();
+        while(cursor.moveToNext()){
+            Alarm alarm = new Alarm();
+            id = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
+            isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+            isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
+            HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
+            MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
+            AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+            ringtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+
+            alarm.setAlarmName(cursor.getString(AlarmNameIndex));
+            alarm.setIsVibrate(cursor.getInt(isVibrateIndex) == 1);
+            alarm.setRingtonePath(cursor.getString(ringtonePathIndex));
+            alarm.setIsActive(cursor.getInt(isActiveIndex) == 1);
+            alarm.setHour(cursor.getInt(HourIndex));
+            alarm.setMin(cursor.getInt(MinIndex));
+            alarm.setAlarmId(cursor.getInt(id));
+            allAlarms.add(alarm);
+        }
+        return  allAlarms;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 

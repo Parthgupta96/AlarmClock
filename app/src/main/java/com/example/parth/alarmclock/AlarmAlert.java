@@ -3,7 +3,6 @@ package com.example.parth.alarmclock;
 import android.app.ActionBar;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -20,6 +19,7 @@ public class AlarmAlert extends AppCompatActivity {
 
     public MediaPlayer mediaPlayer;
     Vibrator vibrator;
+    Alarm alarm;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
 
     @Override
@@ -29,7 +29,10 @@ public class AlarmAlert extends AppCompatActivity {
         unlockScreen();
         setContentView(R.layout.activity_alarm_alert);
 
-        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        Bundle bundle = this.getIntent().getExtras();
+        alarm = (Alarm) bundle.getSerializable("alarm");
+
+        //Uri uri = alarm.getRingtonePath();
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setVolume(1.0f, 1.0f);
@@ -37,7 +40,7 @@ public class AlarmAlert extends AppCompatActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
 
         try {
-            mediaPlayer.setDataSource(this,uri);
+            mediaPlayer.setDataSource(this,Uri.parse(alarm.getRingtonePath()));
             mediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,9 +48,11 @@ public class AlarmAlert extends AppCompatActivity {
 
         mediaPlayer.start();
 
-        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        long[] pattern = { 1000, 200, 200, 200 };
-        vibrator.vibrate(pattern, 0);
+        if(alarm.getIsVibrate()) {
+            vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+            long[] pattern = {1000, 200, 200, 200};
+            vibrator.vibrate(pattern, 0);
+        }
     }
 
     protected void unlockScreen(){
@@ -62,7 +67,8 @@ public class AlarmAlert extends AppCompatActivity {
     public void closeAlarm(View view){
         Log.v(LOG_TAG, "will now stop");
         mediaPlayer.stop();
-        vibrator.cancel();
+        if(vibrator!=null)
+            vibrator.cancel();
         Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
         this.finish();

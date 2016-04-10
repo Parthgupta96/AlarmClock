@@ -1,16 +1,21 @@
 package com.example.parth.alarmclock;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.media.RingtoneManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * Created by Priyanshu on 30-03-2016.
  */
-public class Alarm {
+public class Alarm implements Serializable {
 
     public final String LOG_TAG = Alarm.class.getSimpleName();
 
@@ -142,6 +147,14 @@ public class Alarm {
         Log.v(LOG_TAG, "" + miliseconds);
         //Toast.makeText(, "" + miliseconds)
 
+    }
+
+    void  scheduleAlarm(Context context){
+        Intent myIntent = new Intent(context, AlarmReceiver.class);
+        myIntent.putExtra("alarm", this);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
     }
 
 }

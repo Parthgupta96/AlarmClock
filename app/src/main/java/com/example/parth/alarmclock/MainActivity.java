@@ -27,6 +27,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    int count = 0;
+
     public static TimePicker time;
     static int hours;
     static int min;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
         selectTime.dismiss();
     }
 
-
     public void addAlarm(View view) {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -167,8 +169,13 @@ public class MainActivity extends AppCompatActivity {
             alarmDatabase.insertToDB(alarm);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+        myIntent.putExtra("alarm", alarm);
+        count++;
+        pendingIntent = PendingIntent.getBroadcast(this, count, myIntent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+//        Alarm alarm = getNext();
+//        if(alarm != null)
+            //alarm.scheduleAlarm(getApplicationContext());
 
         alarmDatabase.viewData(this);
         selectTime.dismiss();
