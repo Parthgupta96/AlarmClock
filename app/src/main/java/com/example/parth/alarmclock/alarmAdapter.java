@@ -1,7 +1,6 @@
 package com.example.parth.alarmclock;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +44,6 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
         ViewHolder vh = null;
         View view = convertView;
         if (convertView == null) {
-            Log.v("error", "in get view");
             vh = new ViewHolder();
             LayoutInflater vi = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -61,7 +59,12 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
 
 
         vh.alarmTime.setText(alarms.get(position).getTimeInString());
-        vh.alarmName.setText(alarms.get(position).getAlarmName());
+        String string =alarms.get(position).getAlarmName();
+        if(string.equals("")) {
+            vh.alarmName.setVisibility(View.GONE);
+        }else{
+            vh.alarmName.setText(alarms.get(position).getAlarmName());
+        }
         vh.OnOff.setChecked(alarms.get(position).getIsActive());
 
         return view;

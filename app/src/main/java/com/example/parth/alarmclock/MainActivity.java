@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -112,6 +113,14 @@ public class MainActivity extends AppCompatActivity {
                 addNewAlarm();
             }
         });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(),EditAlarm.class);
+                intent.putExtra("alarm",alarmsList.get(position));
+                startActivity(intent);
+            }
+        });
     }
 
     public void ringtonePath(View view){
@@ -170,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
 
-        alarmDatabase.viewData(this);
+       // alarmDatabase.viewData(this);
         selectTime.dismiss();
 
     }
