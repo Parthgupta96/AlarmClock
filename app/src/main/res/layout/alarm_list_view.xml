@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:descendantFocusability="blocksDescendants"
         android:padding="5dp">
 
         <CheckBox
@@ -17,11 +18,20 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_weight="0.5"/>
+        <View
+            android:layout_width="2dp"
+            android:id="@+id/view"
+            android:layout_centerHorizontal="true"
+            android:layout_toRightOf="@id/onOffButton"
+            android:background="#d6d4d4"
+            android:layout_height="52dp"/>
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/onOffButton"
+            android:layout_marginLeft="2dp"
+            android:layout_centerHorizontal="true"
+            android:layout_toRightOf="@id/view"
             android:layout_weight="0.5">
 
             <TextView

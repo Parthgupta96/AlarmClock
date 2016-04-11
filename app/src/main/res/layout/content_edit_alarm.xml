@@ -1,0 +1,84 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.parth.alarmclock.EditAlarmFragment"
+    tools:showIn="@layout/activity_edit_alarm">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:padding="2dp"
+        android:id="@+id/EditAlarmLabel"
+        android:layout_height="40dp"
+        android:textSize="20dp"
+        android:text="Alarm label"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:padding="2dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/EditAlarmLabel"
+            android:text="Alarm Time: "
+            android:textSize="30dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/EditAlarmLabel"
+            android:id="@+id/EditAlarmTime"
+            android:text="00:00"
+            android:textSize="30dp"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:text="Vibrate" />
+        <Switch
+            android:id="@+id/EditVibrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:text="Alarm Tone" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/EditRingtone"
+            android:layout_weight="2"
+            android:textSize="20dp"
+            android:text="gaana"
+            />
+
+
+
+    </LinearLayout>
+</LinearLayout>

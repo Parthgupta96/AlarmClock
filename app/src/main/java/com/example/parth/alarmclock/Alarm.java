@@ -15,7 +15,9 @@ import java.util.Calendar;
 /**
  * Created by Priyanshu on 30-03-2016.
  */
-public class Alarm implements Serializable {
+
+public class Alarm implements Serializable{
+
 
     public final String LOG_TAG = Alarm.class.getSimpleName();
 
