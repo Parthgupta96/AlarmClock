@@ -190,11 +190,8 @@ public class MainActivity extends AppCompatActivity {
         count++;
         pendingIntent = PendingIntent.getBroadcast(this, count, myIntent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
-//        Alarm alarm = getNext();
-//        if(alarm != null)
-            //alarm.scheduleAlarm(getApplicationContext());
 
-       // alarmDatabase.viewData(this);
+
         selectTime.dismiss();
 
     }
