@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     static Switch vibrationSwitch;
     static EditText alarmLabel;
     static Button ringtonePathChanger;
+    static Spinner difficultySpinner;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
     AlarmManager alarmManager;
     TimeSelection selectTime;
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
     int AlarmNameIndex;
     int RingtonePathIndex;
     Boolean noAlarm=true;
+
+    int DifficultyIndex;
+
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
@@ -65,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         alarmsList = new ArrayList<>();
-
 
         addAlarm = (TextView) findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
@@ -92,15 +96,16 @@ public class MainActivity extends AppCompatActivity {
                 HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
                 MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
                 AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
-
+//                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
                 RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
 
-                alarm.setIsActive(1== cursor.getInt(isActiveIndex));
-                alarm.setIsVibrate(1==cursor.getInt(isVibrateIndex));
+                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
+                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
                 alarm.setHour(cursor.getInt(HourIndex));
                 alarm.setMin(cursor.getInt(MinIndex));
                 alarm.setAlarmName(cursor.getString(AlarmNameIndex));
                 alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
+//                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
                 alarm.setTimeInString();
 
                 alarmsList.add(alarm);
@@ -169,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         alarm.setIsVibrate(vibrationSwitch.isChecked());
         alarm.setIsActive(Boolean.TRUE);
         alarm.setRingtonePath(ringtone.toString());
+        alarm.setDifficulty(Alarm.Difficulty.valueOf(difficultySpinner.getSelectedItem().toString()));
 
         mAlarmAdapter.notifyDataSetChanged();
         alarmsList.add(alarm);

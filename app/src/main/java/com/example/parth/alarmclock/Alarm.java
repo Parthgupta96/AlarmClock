@@ -30,10 +30,28 @@ public class Alarm implements Serializable {
     private long miliseconds;
     private String alarmName;
     private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
-
     private String timeInString;
     private String snackbarDialog;
     private int timeDifference[] = new int[2];
+    enum Difficulty{
+        Easy,
+        Medium,
+        Hard;
+
+        @Override
+        public String toString() {
+            switch (this.ordinal()){
+                case 0:
+                    return "Easy";
+                case 1:
+                    return "Medium";
+                case 2:
+                    return "Hard";
+            }
+            return super.toString();
+        }
+    }
+    private Difficulty difficulty = Difficulty.Easy;
 
 
     Boolean getIsActive() {
@@ -71,6 +89,10 @@ public class Alarm implements Serializable {
     Calendar getCalendar() {
         return calendar;
     }
+
+    Difficulty getDifficulty(){ return difficulty; }
+
+    void setDifficulty(Difficulty difficulty){ this.difficulty = difficulty; }
 
     void setIsActive() {
         isActive = (!isActive);

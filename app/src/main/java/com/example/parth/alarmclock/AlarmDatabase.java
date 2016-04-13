@@ -26,8 +26,9 @@ public class AlarmDatabase extends SQLiteOpenHelper {
     static final String COLUMN_MIN = "min";
     static final String COLUMN_ALARMNAME = "alarm_name";
     static final String COLUMN_RINGTONEPATH = "ringtone_path";
+    static final String COLUMN_DIFFICULTY = "difficulty_level";
     static final String COLUMN_TIMEINSTRING = "time_in_string";
-    static final String createTable = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_ALARMNAME + " TEXT, " + COLUMN_ISACTIVE + " VARCHAR(255), " + COLUMN_ISVIBRATE + " VARCHAR(255), " + COLUMN_HOUR + " VARCHAR(255), " + COLUMN_MIN + " VARCHAR(255), " + COLUMN_RINGTONEPATH + " VARCHAR(255));";
+    static final String createTable = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_ALARMNAME + " TEXT, " + COLUMN_ISACTIVE + " VARCHAR(255), " + COLUMN_ISVIBRATE + " VARCHAR(255), " + COLUMN_HOUR + " VARCHAR(255), " + COLUMN_MIN + " VARCHAR(255), " + COLUMN_DIFFICULTY + " VARCHAR(255), " + COLUMN_RINGTONEPATH + " VARCHAR(255));";
     static final String deleteTable = "DROPTABLE IF EXISTES " + TABLE_NAME;
 
 
@@ -45,9 +46,10 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         contentValues.put(COLUMN_MIN,alarm.getMin());
         contentValues.put(COLUMN_ALARMNAME,alarm.getAlarmName());
         contentValues.put(COLUMN_RINGTONEPATH,alarm.getRingtonePath());
+        contentValues.put(COLUMN_DIFFICULTY,alarm.getDifficulty().ordinal());
 
         SQLiteDatabase db = this.getWritableDatabase();
-       long change = db.insert(TABLE_NAME,null,contentValues);
+        long change = db.insert(TABLE_NAME,null,contentValues);
         if(change<1){
             Log.v(LOG_TAG,"no change");
         }
@@ -55,7 +57,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         db.close();
     }
     public Cursor getCursor(){
-        String columns[] ={COLUMN_ISACTIVE,COLUMN_ISVIBRATE,COLUMN_HOUR,COLUMN_MIN,COLUMN_ALARMNAME,COLUMN_RINGTONEPATH};
+        String columns[] ={COLUMN_ISACTIVE,COLUMN_ISVIBRATE,COLUMN_HOUR,COLUMN_MIN,COLUMN_ALARMNAME,COLUMN_RINGTONEPATH,COLUMN_DIFFICULTY};
         Cursor cursor = null;
         String string[]={COLUMN_ALARMNAME};
         SQLiteDatabase db = this.getReadableDatabase();
@@ -100,6 +102,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         int AlarmNameIndex;
         int ringtonePathIndex;
         int id;
+        int difficultyIndex;
         String string = "";
         cursor.moveToFirst();
         while(cursor.moveToNext()){
@@ -111,6 +114,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
             AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
             ringtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+            difficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
 
             alarm.setAlarmName(cursor.getString(AlarmNameIndex));
             alarm.setIsVibrate(cursor.getInt(isVibrateIndex) == 1);
@@ -119,6 +123,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             alarm.setHour(cursor.getInt(HourIndex));
             alarm.setMin(cursor.getInt(MinIndex));
             alarm.setAlarmId(cursor.getInt(id));
+            alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(difficultyIndex)]);
             allAlarms.add(alarm);
         }
         return  allAlarms;
