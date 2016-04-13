@@ -13,8 +13,9 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="DialogTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="DialogTheme" parent="AppTheme">
         <item name="android:textColorHint">@color/colorAccent</item>
+
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

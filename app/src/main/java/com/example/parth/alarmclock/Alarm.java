@@ -16,7 +16,7 @@ import java.util.Calendar;
  * Created by Priyanshu on 30-03-2016.
  */
 
-public class Alarm implements Serializable{
+public class Alarm implements Serializable {
 
 
     public final String LOG_TAG = Alarm.class.getSimpleName();
@@ -40,8 +40,13 @@ public class Alarm implements Serializable{
         return isActive;
     }
 
-    int getHour(){return hour;}
-    int getMin(){return min;}
+    int getHour() {
+        return hour;
+    }
+
+    int getMin() {
+        return min;
+    }
 
     Boolean getIsVibrate() {
         return isVibrate;
@@ -92,20 +97,29 @@ public class Alarm implements Serializable{
         ringtonePath = path;
     }
 
-    void setHour(int hour){
+    void setHour(int hour) {
         this.hour = hour;
     }
 
-    void setMin(int min){
+    void setMin(int min) {
         this.min = min;
     }
 
 
-    void setTimeInString() {
-        if (min > 9)
-            timeInString = hour + " : " + min;
-        else {
-            timeInString = hour + " : 0" + min;
+     void setTimeInString() {
+        if (hour > 9) {
+            if (min > 9)
+                timeInString = hour + " : " + min;
+            else {
+                timeInString = hour + " : 0" + min;
+            }
+        }else
+        {timeInString ="0";
+            if (min > 9)
+                timeInString = hour + " : " + min;
+            else {
+                timeInString = hour + " : 0" + min;
+            }
         }
     }
 
@@ -123,7 +137,7 @@ public class Alarm implements Serializable{
         timeDifference[0] += alarmHr - currentHr;
 
         if (currentHr > alarmHr || (currentHr == alarmHr && currentMin > alarmMin)) {//alarm for next day
-            timeDifference[0] +=24 ;
+            timeDifference[0] += 24;
             this.calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
 
@@ -151,7 +165,7 @@ public class Alarm implements Serializable{
 
     }
 
-    void  scheduleAlarm(Context context){
+    void scheduleAlarm(Context context) {
         Intent myIntent = new Intent(context, AlarmReceiver.class);
         myIntent.putExtra("alarm", this);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, 0);

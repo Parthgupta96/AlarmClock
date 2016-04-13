@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     int MinIndex ;
     int AlarmNameIndex;
     int RingtonePathIndex;
-
+    Boolean noAlarm=true;
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
@@ -66,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         alarmsList = new ArrayList<>();
 
-//        AlarmList = new ArrayList<>();
-//        AlarmNameList = new ArrayList<>();
 
         addAlarm = (TextView) findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
@@ -80,9 +78,13 @@ public class MainActivity extends AppCompatActivity {
         cursor = alarmDatabase.getCursor();
 
         if(cursor!=null){
-            addAlarm.setVisibility(View.GONE);
+
 
             while(cursor.moveToNext()){
+                if(noAlarm) {
+                    addAlarm.setVisibility(View.GONE);
+                    noAlarm = false;
+                }
                 alarm = new Alarm();
 
                 isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
@@ -193,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void addNewAlarm() {
         selectTime = new TimeSelection();
+        //selectTime.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         selectTime.show(getFragmentManager(), "Time Picker");
     }
 
