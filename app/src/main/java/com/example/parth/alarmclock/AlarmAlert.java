@@ -22,6 +22,9 @@ public class AlarmAlert extends AppCompatActivity {
     Vibrator vibrator;
     Alarm alarm;
     TextView answer;
+    TextView question;
+    String questionString;
+    String actualAnswer;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
     String answerString = "";
 
@@ -36,6 +39,13 @@ public class AlarmAlert extends AppCompatActivity {
         alarm = (Alarm) bundle.getSerializable("alarm");
 
         //Uri uri = alarm.getRingtonePath();
+        question = (TextView)findViewById(R.id.question);
+        answer = (TextView) findViewById(R.id.answer);
+
+        String diff = alarm.getDifficulty().toString();
+        questionString = GenerateMathsQuestion.generateQuestion(diff);
+        question.setText(questionString);
+        actualAnswer = EvaluateString.evaluate(questionString);
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setVolume(1.0f, 1.0f);
@@ -56,8 +66,6 @@ public class AlarmAlert extends AppCompatActivity {
             long[] pattern = {1000, 200, 200, 200};
             vibrator.vibrate(pattern, 0);
         }
-
-        answer = (TextView) findViewById(R.id.answer);
     }
 
     public void button1(View view){
@@ -111,7 +119,7 @@ public class AlarmAlert extends AppCompatActivity {
     }
 
     public void submit(View view){
-        if(answerString.equals("23")){
+        if(answerString.equals(actualAnswer)){
             closeAlarm();
         }
     }

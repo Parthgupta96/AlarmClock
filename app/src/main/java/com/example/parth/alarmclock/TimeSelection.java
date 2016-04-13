@@ -5,14 +5,20 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TimePicker;
+
+import java.util.ArrayList;
 
 
 public class TimeSelection extends DialogFragment{
 
+    static ArrayList<String> difficultyList;
+    static ArrayAdapter<String> difficultyLevelAdapter;
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
     }
@@ -26,6 +32,16 @@ public class TimeSelection extends DialogFragment{
         MainActivity.vibrationSwitch = (Switch)rootView.findViewById(R.id.vibrateButton);
         MainActivity.alarmLabel = (EditText)rootView.findViewById(R.id.alarmName);
         MainActivity.ringtonePathChanger = (Button)rootView.findViewById((R.id.ringtonePathPicker));
+        MainActivity.difficultySpinner = (Spinner)rootView.findViewById(R.id.difficultyLevel);
+
+        difficultyList = new ArrayList<>();
+        difficultyList.add("Easy");
+        difficultyList.add("Medium");
+        difficultyList.add("Hard");
+        difficultyLevelAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, difficultyList);
+        difficultyLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        MainActivity.difficultySpinner.setAdapter(difficultyLevelAdapter);
+
 
         return rootView;
 
