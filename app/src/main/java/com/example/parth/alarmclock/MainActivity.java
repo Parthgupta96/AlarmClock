@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         alarm.setDifficulty(Alarm.Difficulty.valueOf(difficultySpinner.getSelectedItem().toString()));
         alarm.setAlarmId(id);
 
-        mAlarmAdapter.notifyDataSetChanged();
+        //database
         alarmDatabase.insertToDB(alarm);
 
 
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
-        //database
+
 
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
         //        alarmsList.add(alarm);
         //to arrange when new alarm is added
-        alarmsList.clear();
+
         updateListView();
         selectTime.dismiss();
 
@@ -201,7 +201,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateListView() {
-        mAlarmAdapter.notifyDataSetChanged();
+
+        alarmsList.clear();
+
 //        ArrayList<Alarm> alarmsList2 = new ArrayList<>();
         cursor = alarmDatabase.sortQuery();
         //cursor.moveToFirst();
@@ -233,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 alarm.setAlarmId(cursor.getInt(idIndex));
 
                 alarmsList.add(alarm);
+                mAlarmAdapter.notifyDataSetChanged();
 
             }
         }
@@ -248,14 +251,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         alarmsList.clear();
-        Log.d(LOG_TAG,"OnPause");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "OnResume");
-
         updateListView();
 
     }

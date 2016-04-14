@@ -62,8 +62,10 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
         AlarmDatabase alarmDatabase = new AlarmDatabase(getContext());
         Alarm alarm = alarmDatabase.getAlarm(id);
         Log.v("in list view adapter", "id: " + alarm.getAlarmId());
+
         vh.alarmTime.setText(alarms.get(position).getTimeInString());
-        String string = alarms.get(position).getAlarmName();
+
+        String string = alarm.getAlarmName();
         if(string.equals("")) {
             vh.alarmName.setVisibility(View.GONE);
         }else{

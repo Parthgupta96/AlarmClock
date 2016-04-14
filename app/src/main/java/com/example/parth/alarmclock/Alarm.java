@@ -149,6 +149,16 @@ public class Alarm implements Serializable {
 
     void setMilliseconds(long milliseconds){ this.milliseconds = milliseconds; }
 
+    void setMilliseconds(int hour,int min){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, min);
+        calendar.set(Calendar.SECOND, 000);
+        milliseconds = calendar.getTimeInMillis();
+
+    }
+
     void calcTimeDifference(int alarmHr, int alarmMin) {
         //timeDifference[0] is hours
         Calendar calendar = Calendar.getInstance();
