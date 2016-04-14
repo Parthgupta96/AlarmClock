@@ -196,7 +196,7 @@ public class EditAlarm extends AppCompatActivity {
         alarm.setRingtonePath(newRingtonePath);
         Log.v("in edit alarm", "id: " + alarm.getAlarmId());
         alarmDatabase.updateData(alarm);
-        setResult(1, null);
+        //setResult(1, null);
         this.finish();
     }
 

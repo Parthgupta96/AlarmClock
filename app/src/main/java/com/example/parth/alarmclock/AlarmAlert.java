@@ -148,6 +148,21 @@ public class AlarmAlert extends AppCompatActivity {
             vibrator.cancel();
         Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
+        Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
+        alarm.setIsActive(false);
+        AlarmDatabase alarmDatabase = new AlarmDatabase(this);
+        alarmDatabase.updateData(alarm);
+//        AlarmDatabase alarmDatabase = new AlarmDatabase(this);
+//        Cursor cursor = alarmDatabase.sortQuery();
+//        while(cursor.moveToNext()){
+//            if((alarm.getAlarmId().equals("" + cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID))))){
+//                break;
+//            }
+//            cursor.moveToNext();
+//            Alarm newAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
+//            newAlarm.scheduleAlarm(this);
+//        }
+
         this.finish();
     }
     @Override

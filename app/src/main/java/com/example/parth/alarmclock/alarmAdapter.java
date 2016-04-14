@@ -1,6 +1,7 @@
 package com.example.parth.alarmclock;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +38,11 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
 
     }
 
-
+    ViewHolder vh;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder vh = null;
+        vh = null;
         View view = convertView;
         if (convertView == null) {
             vh = new ViewHolder();
@@ -57,16 +58,22 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
         } else
             vh = (ViewHolder) view.getTag();
 
-
+        int id = alarms.get(position).getAlarmId();
+        AlarmDatabase alarmDatabase = new AlarmDatabase(getContext());
+        Alarm alarm = alarmDatabase.getAlarm(id);
+        Log.v("in list view adapter", "id: " + alarm.getAlarmId());
         vh.alarmTime.setText(alarms.get(position).getTimeInString());
-        String string =alarms.get(position).getAlarmName();
+        String string = alarms.get(position).getAlarmName();
         if(string.equals("")) {
             vh.alarmName.setVisibility(View.GONE);
         }else{
-            vh.alarmName.setText(alarms.get(position).getAlarmName());
+            vh.alarmName.setText(alarm.getAlarmName());
         }
-        vh.OnOff.setChecked(alarms.get(position).getIsActive());
-
+        vh.OnOff.setChecked(alarm.getIsActive());
+        Log.v("in alarm adapter", "is active: " + alarm.getIsActive());
+        if(vh.OnOff.isChecked() == false){
+            alarm.setIsActive(false);
+        }
         return view;
     }
 }

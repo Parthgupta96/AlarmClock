@@ -24,10 +24,10 @@ public class Alarm implements Serializable {
     private Calendar calendar;
     private Boolean isActive = true;
     private Boolean isVibrate = true;
-    private String alarmId;
+    private int alarmId;
     private int hour;
     private int min;
-    private long miliseconds;
+    private long milliseconds;
     private String alarmName;
     private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
     private String timeInString;
@@ -70,7 +70,7 @@ public class Alarm implements Serializable {
         return isVibrate;
     }
 
-    String getAlarmId() {
+    int getAlarmId() {
         return alarmId;
     }
 
@@ -92,10 +92,12 @@ public class Alarm implements Serializable {
 
     Difficulty getDifficulty(){ return difficulty; }
 
+    long getMilliseconds(){ return milliseconds; }
+
     void setDifficulty(Difficulty difficulty){ this.difficulty = difficulty; }
 
-    void setIsActive() {
-        isActive = (!isActive);
+    void setIsActive(boolean active) {
+        isActive = active;
     }
 
     void setIsActive(Boolean status) {
@@ -107,8 +109,8 @@ public class Alarm implements Serializable {
     }
 
     void setAlarmId(int id) {
-        String string = "" + id;
-        this.alarmId = string;
+        //String string = "" + id;
+        this.alarmId = id;
     }
 
     void setAlarmName(String name) {
@@ -144,6 +146,8 @@ public class Alarm implements Serializable {
             }
         }
     }
+
+    void setMilliseconds(long milliseconds){ this.milliseconds = milliseconds; }
 
     void calcTimeDifference(int alarmHr, int alarmMin) {
         //timeDifference[0] is hours
@@ -181,17 +185,18 @@ public class Alarm implements Serializable {
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 000);
 
-        miliseconds = calendar.getTimeInMillis();
-        Log.v(LOG_TAG, "" + miliseconds);
+        milliseconds = calendar.getTimeInMillis();
+        setMilliseconds(milliseconds);
+        Log.v(LOG_TAG, "" + milliseconds);
         //Toast.makeText(, "" + miliseconds)
 
     }
 
     void scheduleAlarm(Context context) {
         Intent myIntent = new Intent(context, AlarmReceiver.class);
-        myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        myIntent.putExtra("alarm", this);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
     }
 
