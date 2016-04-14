@@ -24,7 +24,7 @@ public class Alarm implements Serializable {
     private Calendar calendar;
     private Boolean isActive = true;
     private Boolean isVibrate = true;
-    private int alarmId;
+    private String alarmId;
     private int hour;
     private int min;
     private long miliseconds;
@@ -70,7 +70,7 @@ public class Alarm implements Serializable {
         return isVibrate;
     }
 
-    int getAlarmId() {
+    String getAlarmId() {
         return alarmId;
     }
 
@@ -107,7 +107,8 @@ public class Alarm implements Serializable {
     }
 
     void setAlarmId(int id) {
-        this.alarmId = id;
+        String string = "" + id;
+        this.alarmId = string;
     }
 
     void setAlarmName(String name) {
@@ -135,12 +136,11 @@ public class Alarm implements Serializable {
             else {
                 timeInString = hour + " : 0" + min;
             }
-        }else
-        {timeInString ="0";
+        }else{
             if (min > 9)
-                timeInString = hour + " : " + min;
+                timeInString = "0" + hour + " : " + min;
             else {
-                timeInString = hour + " : 0" + min;
+                timeInString = "0" + hour + " : 0" + min;
             }
         }
     }

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     int count = 0;
+    int id = 0;
 
     public static TimePicker time;
     static int hours;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     String text = "";
     Cursor cursor;
-    AlarmDatabase alarmDatabase;
+    public AlarmDatabase alarmDatabase;
     Alarm alarm;
     Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     int MinIndex ;
     int AlarmNameIndex;
     int RingtonePathIndex;
+    int idIndex;
     Boolean noAlarm=true;
 
     int DifficultyIndex;
@@ -75,43 +77,13 @@ public class MainActivity extends AppCompatActivity {
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
         listView = (ListView) findViewById(R.id.ListView);
 
-        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime,alarmsList);
+        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, alarmsList);
         listView.setAdapter(mAlarmAdapter);
 
         alarmDatabase = new AlarmDatabase(this);
-        cursor = alarmDatabase.getCursor();
-
-        if(cursor!=null){
-
-
-            while(cursor.moveToNext()){
-                if(noAlarm) {
-                    addAlarm.setVisibility(View.GONE);
-                    noAlarm = false;
-                }
-                alarm = new Alarm();
-
-                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
-                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
-                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
-                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
-//                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
-                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
-
-                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
-                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
-                alarm.setHour(cursor.getInt(HourIndex));
-                alarm.setMin(cursor.getInt(MinIndex));
-                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
-                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
-//                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
-                alarm.setTimeInString();
-
-                alarmsList.add(alarm);
-
-            }
-        }
+        //cursor.moveToFirst();
+        updateListView();
+ //       alarmsList = alarmDatabase.getAllAlarms();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -126,9 +98,9 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(),EditAlarm.class);
-                intent.putExtra("alarm",alarmsList.get(position));
-                startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), EditAlarm.class);
+                intent.putExtra("alarm", alarmsList.get(position));
+                startActivityForResult(intent, 1);
             }
         });
     }
@@ -148,6 +120,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             ringtone = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+        }else if(resultCode == 1){
+            Log.v(LOG_TAG, "List view updated");
+            Intent refresh = new Intent(this, MainActivity.class);
+            startActivity(refresh);
+            this.finish();
         }
     }
 
@@ -168,6 +145,14 @@ public class MainActivity extends AppCompatActivity {
         text = alarmLabel.getText().toString();
         Log.v(LOG_TAG, "after alarm name set");
 
+        cursor = alarmDatabase.getCursor();
+//        cursor.moveToFirst();
+        if(cursor.moveToLast() == false){
+            id =1;
+        }else {
+            int idTable = cursor.getInt(0);
+            id = idTable + 1;
+        }
         alarm.setAlarm(hours, min, coordinatorLayout);
         alarm.setAlarmName(text);
         alarm.setTimeInString();
@@ -175,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         alarm.setIsActive(Boolean.TRUE);
         alarm.setRingtonePath(ringtone.toString());
         alarm.setDifficulty(Alarm.Difficulty.valueOf(difficultySpinner.getSelectedItem().toString()));
+        alarm.setAlarmId(id);
 
         mAlarmAdapter.notifyDataSetChanged();
         alarmsList.add(alarm);
@@ -183,12 +169,13 @@ public class MainActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
         //database
-            alarmDatabase.insertToDB(alarm);
+        alarmDatabase.insertToDB(alarm);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         myIntent.putExtra("alarm", alarm);
         count++;
         pendingIntent = PendingIntent.getBroadcast(this, count, myIntent, 0);
+        Log.v(LOG_TAG, "count: " + count);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
 //        Alarm alarm = getNext();
 //        if(alarm != null)
@@ -206,10 +193,60 @@ public class MainActivity extends AppCompatActivity {
         selectTime.show(getFragmentManager(), "Time Picker");
     }
 
+    public void updateListView(){
+//        ArrayList<Alarm> alarmsList2 = new ArrayList<>();
+        cursor = alarmDatabase.getCursor();
+        //cursor.moveToFirst();
+        if(cursor!=null){
+
+
+            while(cursor.moveToNext()){
+                if(noAlarm) {
+                    addAlarm.setVisibility(View.GONE);
+                    noAlarm = false;
+                }
+                alarm = new Alarm();
+                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
+                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
+                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
+                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
+                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+                idIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
+
+                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
+                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
+                alarm.setHour(cursor.getInt(HourIndex));
+                alarm.setMin(cursor.getInt(MinIndex));
+                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
+                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
+                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
+                alarm.setTimeInString();
+                alarm.setAlarmId(cursor.getInt(idIndex));
+
+                alarmsList.add(alarm);
+
+            }
+        }
+//        alarmsList = alarmsList2;
+    }
+
     protected void closeAlarm(View view) {
 
 
     }
+
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        mAlarmAdapter.notifyDataSetChanged();
+//        updateListView();
+//        Intent refresh = new Intent(this, MainActivity.class);
+//        startActivity(refresh);
+//        this.finish();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

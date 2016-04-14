@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -45,6 +46,7 @@ public class EditAlarm extends AppCompatActivity {
     String newRingtoneLabel;
     Boolean newIsVibrate;
     Boolean changes = false;
+    AlarmDatabase alarmDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +56,9 @@ public class EditAlarm extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        alarmDatabase = new AlarmDatabase(this);
         alarm = (Alarm) getIntent().getSerializableExtra("alarm");
+        Log.v("Recd alarmin edit alarm", "id: " + alarm.getAlarmId());
 
         newAlarmLabel = oldAlarmLabel = alarm.getAlarmName();
         newTime = oldTime = alarm.getTimeInString();
@@ -149,11 +153,8 @@ public class EditAlarm extends AppCompatActivity {
         });
 
         ringtone.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
                 selectRingtone();
-
-
             }
         });
 
@@ -193,7 +194,10 @@ public class EditAlarm extends AppCompatActivity {
         alarm.setTimeInString();
         alarm.setIsVibrate(newIsVibrate);
         alarm.setRingtonePath(newRingtonePath);
-
+        Log.v("in edit alarm", "id: " + alarm.getAlarmId());
+        alarmDatabase.updateData(alarm);
+        setResult(1, null);
+        this.finish();
     }
 
     String getTimeInString(int hour, int min) {
