@@ -29,9 +29,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    int count = 0;
-    int id = 0;
-
     public static TimePicker time;
     static int hours;
     static int min;
@@ -40,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     static Button ringtonePathChanger;
     static Spinner difficultySpinner;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
+    public AlarmDatabase alarmDatabase;
+    public ArrayList<Alarm> activeAlarm;
+    int count = 0;
+    int id = 0;
     AlarmManager alarmManager;
     TimeSelection selectTime;
     CoordinatorLayout coordinatorLayout;
@@ -47,26 +48,20 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     String text = "";
     Cursor cursor;
-    public AlarmDatabase alarmDatabase;
     Alarm alarm;
     Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-
-    int isActiveIndex ;
-    int isVibrateIndex ;
-    int HourIndex ;
-    int MinIndex ;
+    int isActiveIndex;
+    int isVibrateIndex;
+    int HourIndex;
+    int MinIndex;
     int AlarmNameIndex;
     int RingtonePathIndex;
     int idIndex;
-    Boolean noAlarm=true;
-
+    Boolean noAlarm = true;
     int DifficultyIndex;
-
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
-    public ArrayList<Alarm> activeAlarm;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
 
         alarmDatabase = new AlarmDatabase(this);
         //cursor.moveToFirst();
-        updateListView();
- //       alarmsList = alarmDatabase.getAllAlarms();
+        //updateListView();
+        //       alarmsList = alarmDatabase.getAllAlarms();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -106,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void ringtonePath(View view){
-        final Uri currentTone= RingtoneManager.getActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_ALARM);
+    public void ringtonePath(View view) {
+        final Uri currentTone = RingtoneManager.getActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_ALARM);
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
@@ -149,9 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
         cursor = alarmDatabase.getCursor();
 //        cursor.moveToFirst();
-        if(cursor.moveToLast() == false){
-            id =1;
-        }else {
+        if (cursor.moveToLast() == false) {
+            id = 1;
+        } else {
             int idTable = cursor.getInt(0);
             id = idTable + 1;
         }
@@ -165,49 +160,55 @@ public class MainActivity extends AppCompatActivity {
         alarm.setAlarmId(id);
 
         mAlarmAdapter.notifyDataSetChanged();
-        alarmsList.add(alarm);
-        Intent refresh = new Intent(this, MainActivity.class);
-        startActivity(refresh);
-        this.finish();
+        alarmDatabase.insertToDB(alarm);
+
+
+
+//        Intent refresh = new Intent(this, MainActivity.class);
+//        startActivity(refresh);
+//        this.finish();
 
 
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
         //database
-        alarmDatabase.insertToDB(alarm);
+
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         myIntent.putExtra("alarm", alarm);
         count++;
-        pendingIntent = PendingIntent.getBroadcast(this, (int)alarm.getMilliseconds(), myIntent, 0);
+        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
         Log.v(LOG_TAG, "count: " + count);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
 //        cursor = alarmDataba.this);
 //        Alarm alarm = getNext();
 //        if(alarm != null)
-            //alarm.scheduleAlarm(getApplicationContext());
+        //alarm.scheduleAlarm(getApplicationContext());
 
-       // alarmDatabase.viewData(this);
+        // alarmDatabase.viewData(this);
+
+        //        alarmsList.add(alarm);
+        //to arrange when new alarm is added
+        alarmsList.clear();
+        updateListView();
         selectTime.dismiss();
 
     }
 
     public void addNewAlarm() {
         selectTime = new TimeSelection();
-        //selectTime.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         selectTime.show(getFragmentManager(), "Time Picker");
     }
 
-    public void updateListView(){
+    public void updateListView() {
+        mAlarmAdapter.notifyDataSetChanged();
 //        ArrayList<Alarm> alarmsList2 = new ArrayList<>();
         cursor = alarmDatabase.sortQuery();
         //cursor.moveToFirst();
-        if(cursor!=null){
+        if (cursor != null) {
 
-
-            while(cursor.moveToNext()){
-                if(noAlarm) {
+            while (cursor.moveToNext()) {
+                if (noAlarm) {
                     addAlarm.setVisibility(View.GONE);
                     noAlarm = false;
                 }
@@ -243,16 +244,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        alarmsList.clear();
+        Log.d(LOG_TAG,"OnPause");
+    }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        mAlarmAdapter.notifyDataSetChanged();
-//        updateListView();
-        Intent refresh = new Intent(this, MainActivity.class);
-        startActivity(refresh);
-        this.finish();
+    protected void onResume() {
+        super.onResume();
+        Log.d(LOG_TAG, "OnResume");
+
+        updateListView();
+
     }
+
+//    @Override
+//    protected void onRestart() {
+//        super.onRestart();
+//        mAlarmAdapter.notifyDataSetChanged();
+////        updateListView();
+////        Intent refresh = new Intent(this, MainActivity.class);
+////        startActivity(refresh);
+////        this.finish();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
