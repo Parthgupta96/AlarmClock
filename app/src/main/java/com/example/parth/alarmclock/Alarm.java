@@ -27,59 +27,71 @@ public class Alarm implements Serializable {
     private int alarmId;
     private int hour;
     private int min;
+    //CoordinatorLayout coordinatorLayout;
     private long milliseconds;
     private String alarmName;
     private String ringtonePath = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
     private String timeInString;
     private String snackbarDialog;
     private int timeDifference[] = new int[2];
-    enum Difficulty{
-        Easy,
-        Medium,
-        Hard;
-
-        @Override
-        public String toString() {
-            switch (this.ordinal()){
-                case 0:
-                    return "Easy";
-                case 1:
-                    return "Medium";
-                case 2:
-                    return "Hard";
-            }
-            return super.toString();
-        }
-    }
     private Difficulty difficulty = Difficulty.Easy;
-
 
     Boolean getIsActive() {
         return isActive;
+    }
+
+    void setIsActive(Boolean status) {
+        isActive = status;
     }
 
     int getHour() {
         return hour;
     }
 
+    void setHour(int hour) {
+        this.hour = hour;
+    }
+
     int getMin() {
         return min;
+    }
+
+    void setMin(int min) {
+        this.min = min;
     }
 
     Boolean getIsVibrate() {
         return isVibrate;
     }
 
+    void setIsVibrate(boolean state) {
+        isVibrate = state;
+    }
+
     int getAlarmId() {
         return alarmId;
+    }
+
+    void setAlarmId(int id) {
+        //String string = "" + id;
+        this.alarmId = id;
     }
 
     String getAlarmName() {
         return alarmName;
     }
 
+    void setAlarmName(String name) {
+        this.alarmName = name;
+        Log.v(LOG_TAG, "alarm name set" + alarmName);
+    }
+
     String getRingtonePath() {
         return ringtonePath;
+    }
+
+    void setRingtonePath(String path) {
+        ringtonePath = path;
     }
 
     String getTimeInString() {
@@ -90,55 +102,34 @@ public class Alarm implements Serializable {
         return calendar;
     }
 
-    Difficulty getDifficulty(){ return difficulty; }
+    Difficulty getDifficulty() {
+        return difficulty;
+    }
 
-    long getMilliseconds(){ return milliseconds; }
+    void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
 
-    void setDifficulty(Difficulty difficulty){ this.difficulty = difficulty; }
+    long getMilliseconds() {
+        return milliseconds;
+    }
+
+    void setMilliseconds(long milliseconds) {
+        this.milliseconds = milliseconds;
+    }
 
     void setIsActive(boolean active) {
         isActive = active;
     }
 
-    void setIsActive(Boolean status) {
-        isActive = status;
-    }
-
-    void setIsVibrate(boolean state) {
-        isVibrate = state;
-    }
-
-    void setAlarmId(int id) {
-        //String string = "" + id;
-        this.alarmId = id;
-    }
-
-    void setAlarmName(String name) {
-        this.alarmName = name;
-        Log.v(LOG_TAG, "alarm name set" + alarmName);
-    }
-
-    void setRingtonePath(String path) {
-        ringtonePath = path;
-    }
-
-    void setHour(int hour) {
-        this.hour = hour;
-    }
-
-    void setMin(int min) {
-        this.min = min;
-    }
-
-
-     void setTimeInString() {
+    void setTimeInString() {
         if (hour > 9) {
             if (min > 9)
                 timeInString = hour + " : " + min;
             else {
                 timeInString = hour + " : 0" + min;
             }
-        }else{
+        } else {
             if (min > 9)
                 timeInString = "0" + hour + " : " + min;
             else {
@@ -147,9 +138,11 @@ public class Alarm implements Serializable {
         }
     }
 
-    void setMilliseconds(long milliseconds){ this.milliseconds = milliseconds; }
+//    public void setCoordinatorLayout(CoordinatorLayout coordinatorLayout) {
+//        this.coordinatorLayout = coordinatorLayout;
+//    }
 
-    void setMilliseconds(int hour,int min){
+    void setMilliseconds(int hour, int min) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
@@ -179,18 +172,21 @@ public class Alarm implements Serializable {
 
     }
 
-    void setAlarm(int hour, int min, CoordinatorLayout coordinatorLayout) {
+    void showSnackbar() {
+        CoordinatorLayout coordinatorLayout = MainActivity.getCoordinatorLayout();
         snackbarDialog = "Alarm set for ";
+        calcTimeDifference(hour, min);
+
+        snackbarDialog = snackbarDialog + timeDifference[0] + " Hours and " + timeDifference[1] + " Minutes";
+
+        Snackbar.make(coordinatorLayout, snackbarDialog, Snackbar.LENGTH_LONG).show();
+        timeDifference[0] = timeDifference[1] = 0;
+    }
+
+    void setCalendar(int hour, int min) {
         this.hour = hour;
         this.min = min;
         calendar = Calendar.getInstance();
-        calcTimeDifference(hour, min);
-
-        this.snackbarDialog = this.snackbarDialog + timeDifference[0] + " Hours and " + timeDifference[1] + " Minutes";
-
-        Snackbar.make(coordinatorLayout, this.snackbarDialog, Snackbar.LENGTH_LONG).show();
-        timeDifference[0] = timeDifference[1] = 0;
-
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 000);
@@ -198,16 +194,59 @@ public class Alarm implements Serializable {
         milliseconds = calendar.getTimeInMillis();
         setMilliseconds(milliseconds);
         Log.v(LOG_TAG, "" + milliseconds);
-        //Toast.makeText(, "" + miliseconds)
+    }
+
+    void scheduleAlarm(Context context, boolean schedule) {
+        Intent myIntent = new Intent(context, AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        myIntent.putExtra("alarm", this);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  this.getAlarmId(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        if (schedule) {
+            showSnackbar();
+            Log.v(LOG_TAG,"received context " + context);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
+        }else {
+            alarmManager.cancel(pendingIntent);
+        }
 
     }
 
     void scheduleAlarm(Context context) {
+        showSnackbar();
         Intent myIntent = new Intent(context, AlarmReceiver.class);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) this.getCalendar().getTimeInMillis(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
+    }
+
+    void cancelAlarm(Context context) {
+
+        Intent myIntent = new Intent(context, AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        myIntent.putExtra("alarm", this);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) this.getCalendar().getTimeInMillis(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.cancel(pendingIntent);
+    }
+
+    enum Difficulty {
+        Easy,
+        Medium,
+        Hard;
+
+        @Override
+        public String toString() {
+            switch (this.ordinal()) {
+                case 0:
+                    return "Easy";
+                case 1:
+                    return "Medium";
+                case 2:
+                    return "Hard";
+            }
+            return super.toString();
+        }
     }
 
 }

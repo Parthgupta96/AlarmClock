@@ -42,7 +42,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_ISACTIVE,1);
         contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate()==true?1:0));
-        contentValues.put(COLUMN_HOUR,alarm.getHour());
+        contentValues.put(COLUMN_HOUR, alarm.getHour());
         contentValues.put(COLUMN_MIN, alarm.getMin());
         contentValues.put(COLUMN_ALARMNAME,alarm.getAlarmName());
         contentValues.put(COLUMN_RINGTONEPATH,alarm.getRingtonePath());
@@ -56,11 +56,19 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         }
         Log.v(LOG_TAG, "name: " + alarm.getAlarmName());
         Log.v(LOG_TAG, "id: " + alarm.getAlarmId());
-        Log.v(LOG_TAG, "database id: " + AlarmDatabase.COLUMN_UID);
         db.close();
     }
 
-    public void updateData(Alarm alarm){
+    public void updateData(Alarm alarm, boolean status) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        Log.v("in updateData ", "id: " + alarm.getAlarmId());
+        contentValues.put(COLUMN_ISACTIVE, status?1:0);
+        db.update(TABLE_NAME, contentValues, "_id = ?", new String[]{("" + alarm.getAlarmId())});
+        Log.v(LOG_TAG, "updated");
+
+    }
+        public void updateData(Alarm alarm){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         Log.v("in updateData ", "id: " + alarm.getAlarmId());
@@ -197,6 +205,11 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             allAlarms.add(alarm);
         }
         return  allAlarms;
+    }
+
+    public void deleteAlarm(Alarm alarm){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME, COLUMN_UID + " = ?", new String[] {"" + alarm.getAlarmId()});
     }
 
     @Override

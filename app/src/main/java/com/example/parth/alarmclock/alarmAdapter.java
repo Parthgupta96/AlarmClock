@@ -16,9 +16,10 @@ import java.util.ArrayList;
  */
 
 public class alarmAdapter extends ArrayAdapter<Alarm> {
-
+private MainActivity main ;
     private ArrayList<Alarm> alarms;
     Context c;
+
 
     // public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList, ArrayList<String> AlarmNameList) {
     public alarmAdapter(Context context, int resource, int id, ArrayList<Alarm> alarms) {
@@ -27,6 +28,7 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
 
         this.alarms = alarms;
         this.c = context;
+        main = (MainActivity)context;
     }
 
 
@@ -47,8 +49,6 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
         if (convertView == null) {
             vh = new ViewHolder();
             LayoutInflater vi = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            // vi = LayoutInflater.from(getContext());
             view = vi.inflate(R.layout.alarm_list_view, parent, false);
             vh.alarmTime = (TextView) view.findViewById(R.id.alarmTime);
             vh.alarmName = (TextView) view.findViewById(R.id.alarmName);
@@ -59,23 +59,39 @@ public class alarmAdapter extends ArrayAdapter<Alarm> {
             vh = (ViewHolder) view.getTag();
 
         int id = alarms.get(position).getAlarmId();
-        AlarmDatabase alarmDatabase = new AlarmDatabase(getContext());
-        Alarm alarm = alarmDatabase.getAlarm(id);
-        Log.v("in list view adapter", "id: " + alarm.getAlarmId());
+        final AlarmDatabase alarmDatabase = new AlarmDatabase(getContext());
 
-        vh.alarmTime.setText(alarms.get(position).getTimeInString());
+        //final Alarm alarm = alarmDatabase.getAlarm(id);
+        final Alarm alarm = alarms.get(position);
+
+        vh.alarmTime.setText(alarm.getTimeInString());
 
         String string = alarm.getAlarmName();
         if(string.equals("")) {
             vh.alarmName.setVisibility(View.GONE);
         }else{
+            vh.alarmName.setVisibility(View.VISIBLE);
             vh.alarmName.setText(alarm.getAlarmName());
         }
         vh.OnOff.setChecked(alarm.getIsActive());
         Log.v("in alarm adapter", "is active: " + alarm.getIsActive());
-        if(vh.OnOff.isChecked() == false){
-            alarm.setIsActive(false);
-        }
+        vh.OnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //alarm.getAlarmId();
+                //alarm.setIsActive(!alarm.getIsActive());
+                if (alarm.getIsActive()) {//now inActive
+                    Log.v("in alarmAdapter", "will cancel alarm " + alarm.getIsActive());
+                    alarm.scheduleAlarm(getContext(),!alarm.getIsActive());
+                } else {
+                    alarm.scheduleAlarm(getContext(),!alarm.getIsActive());
+                }
+                //alarmDatabase.updateData();
+                alarmDatabase.updateData(alarm,!alarm.getIsActive());
+                main.updateListView();
+
+            }
+        });
         return view;
     }
 }

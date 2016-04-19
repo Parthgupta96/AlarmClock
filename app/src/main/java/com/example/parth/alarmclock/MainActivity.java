@@ -1,7 +1,9 @@
 package com.example.parth.alarmclock;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.RingtoneManager;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     int id = 0;
     AlarmManager alarmManager;
     TimeSelection selectTime;
-    CoordinatorLayout coordinatorLayout;
+    static CoordinatorLayout coordinatorLayout;
     TextView addAlarm;
     ListView listView;
     String text = "";
@@ -99,6 +101,41 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                final int t=i;
+                AlertDialog.Builder delete = new AlertDialog.Builder(MainActivity.this);
+                delete.setMessage("Delete -_-?");
+
+                delete.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //delete();
+                        alarm.scheduleAlarm(getApplicationContext(), false);
+                        Log.v(LOG_TAG, "" + getApplicationContext());
+                        alarmDatabase.deleteAlarm(alarmsList.get(t));
+//                        if(alarmsList.size()==1){
+//
+//                        }
+                        updateListView();
+                        dialog.cancel();
+
+                    }
+                });
+                delete.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+
+                    }
+                });
+                delete.show();
+
+                return true;
+            }
+        });
     }
 
     public void ringtonePath(View view) {
@@ -150,7 +187,9 @@ public class MainActivity extends AppCompatActivity {
             int idTable = cursor.getInt(0);
             id = idTable + 1;
         }
-        alarm.setAlarm(hours, min, coordinatorLayout);
+        alarm.setCalendar(hours, min);
+       // alarm.setCoordinatorLayout(coordinatorLayout);
+        alarm.showSnackbar();
         alarm.setAlarmName(text);
         alarm.setTimeInString();
         alarm.setIsVibrate(vibrationSwitch.isChecked());
@@ -172,14 +211,14 @@ public class MainActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
 
+        alarm.scheduleAlarm(this,true);
 
-
-        Intent myIntent = new Intent(this, AlarmReceiver.class);
-        myIntent.putExtra("alarm", alarm);
-        count++;
-        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
-        Log.v(LOG_TAG, "count: " + count);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+//        Intent myIntent = new Intent(this, AlarmReceiver.class);
+//        myIntent.putExtra("alarm", alarm);
+//        count++;
+//        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
+//        Log.v(LOG_TAG, "count: " + count);
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
 //        cursor = alarmDataba.this);
 //        Alarm alarm = getNext();
 //        if(alarm != null)
@@ -201,13 +240,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateListView() {
-
+        mAlarmAdapter.notifyDataSetChanged();
         alarmsList.clear();
 
 //        ArrayList<Alarm> alarmsList2 = new ArrayList<>();
         cursor = alarmDatabase.sortQuery();
         //cursor.moveToFirst();
-        if (cursor != null) {
+
 
             while (cursor.moveToNext()) {
                 if (noAlarm) {
@@ -232,20 +271,28 @@ public class MainActivity extends AppCompatActivity {
                 alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
                 alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
                 alarm.setTimeInString();
+                //alarm.setCoordinatorLayout(coordinatorLayout);
                 alarm.setAlarmId(cursor.getInt(idIndex));
-
+                alarm.setCalendar(alarm.getHour(),alarm.getMin());
                 alarmsList.add(alarm);
                 mAlarmAdapter.notifyDataSetChanged();
 
             }
+        if(alarmsList.isEmpty()){
+            addAlarm.setVisibility(View.VISIBLE);
         }
+
 //        alarmsList = alarmsList2;
     }
 
     protected void closeAlarm(View view) {
 
-
     }
+
+    public static CoordinatorLayout getCoordinatorLayout() {
+        return coordinatorLayout;
+    }
+
 
     @Override
     protected void onPause() {

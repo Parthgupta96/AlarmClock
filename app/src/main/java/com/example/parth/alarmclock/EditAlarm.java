@@ -154,7 +154,6 @@ public class EditAlarm extends AppCompatActivity {
                 TimePickerDialog dialog = new TimePickerDialog(EditAlarm.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
                         newHour = hourOfDay;
                         newMin = minute;
                         newTime = getTimeInString(newHour, newMin);
@@ -238,16 +237,19 @@ public class EditAlarm extends AppCompatActivity {
     }
 
     void saveChanges() {
+        alarm.scheduleAlarm(getApplicationContext(),false);
         alarm.setAlarmName(newAlarmLabel);
         alarm.setHour(newHour);
         alarm.setMin(newMin);
         alarm.setTimeInString();
+        alarm.setCalendar(newHour,newMin);
         alarm.setIsVibrate(newIsVibrate);
         alarm.setRingtonePath(newRingtonePath);
         alarm.setMilliseconds(newHour, newMin);
         alarm.setDifficulty(newDifficulty);
         Log.v("in edit alarm", "id: " + alarm.getAlarmId());
         alarmDatabase.updateData(alarm);
+        alarm.scheduleAlarm(getApplicationContext(),true);
         //setResult(1, null);
         // this.finish();
     }
