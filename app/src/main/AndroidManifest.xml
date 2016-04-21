@@ -21,31 +21,38 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditAlarm"
+        <activity
+            android:name=".EditAlarm"
             android:label="Edit Alarm"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-
             android:parentActivityName=".MainActivity"
-            >
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.example.parth.alarmclock.MainActivity" />
-
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.parth.alarmclock.MainActivity" />
         </activity>
         <activity
             android:name=".AlarmAlert"
             android:label="@string/title_activity_alarm_alert"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
-        <!--android:parentActivityName=".MainActivity"-->
 
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value="com.example.parth.alarmclock.MainActivity" />-->
+            <!-- android:parentActivityName=".MainActivity" -->
+
+
+            <!-- <meta-data -->
+            <!-- android:name="android.support.PARENT_ACTIVITY" -->
+            <!-- android:value="com.example.parth.alarmclock.MainActivity" /> -->
         </activity>
-        <receiver android:name=".AlarmReceiver" android:enabled="true" />
 
+        <receiver
+            android:name=".AlarmReceiver"
+            android:enabled="true" />
+
+        <service
+            android:name=".AlarmService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

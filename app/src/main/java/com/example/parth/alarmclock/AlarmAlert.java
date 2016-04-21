@@ -2,6 +2,7 @@ package com.example.parth.alarmclock;
 
 import android.app.ActionBar;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -24,7 +25,7 @@ public class AlarmAlert extends AppCompatActivity {
     public MediaPlayer mediaPlayer;
     Vibrator vibrator;
     Vibrator wrongAnsVibrator;
-    Alarm alarm;
+    Alarm alarm, currentAlarm;
     TextView answer;
     TextView question;
     String questionString;
@@ -32,6 +33,8 @@ public class AlarmAlert extends AppCompatActivity {
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
     String answerString = "";
     ColorStateList oldColors;
+    Cursor cursor;
+    AlarmDatabase alarmDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class AlarmAlert extends AppCompatActivity {
 
         Bundle bundle = this.getIntent().getExtras();
         alarm = (Alarm) bundle.getSerializable("alarm");
+        alarmDatabase = new AlarmDatabase(this);
 
         //Uri uri = alarm.getRingtonePath();
         question = (TextView)findViewById(R.id.question);
@@ -174,8 +178,19 @@ public class AlarmAlert extends AppCompatActivity {
         mediaPlayer.release();
         Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
         alarm.setIsActive(false);
-        AlarmDatabase alarmDatabase = new AlarmDatabase(this);
         alarmDatabase.updateData(alarm);
+        cursor = alarmDatabase.sortQuery();
+        while(cursor.moveToNext()){
+            int id = cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID));
+            currentAlarm = alarmDatabase.getAlarm(id);
+            Log.v(LOG_TAG, "id of next alarm " + id);
+            if(currentAlarm != null) {
+                if (currentAlarm.getIsActive() == true) {
+                    currentAlarm.scheduleAlarm(this, true);
+                    break;
+                }
+            }
+        }
 //        AlarmDatabase alarmDatabase = new AlarmDatabase(this);
 //        Cursor cursor = alarmDatabase.sortQuery();
 //        while(cursor.moveToNext()){

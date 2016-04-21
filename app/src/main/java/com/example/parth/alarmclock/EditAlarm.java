@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 
 public class EditAlarm extends AppCompatActivity {
 
-    Alarm alarm;
+    Alarm alarm, currentAlarm;
     TextView ringtone;
     Uri newRingtoneUri;
     TextView AlarmLabel;
@@ -58,6 +59,7 @@ public class EditAlarm extends AppCompatActivity {
     Alarm.Difficulty oldDifficulty;
     Alarm.Difficulty newDifficulty;
     AlarmDatabase alarmDatabase;
+    Cursor cursor;
 
     static ArrayList<String> difficultyList;
     static ArrayAdapter<String> difficultyLevelAdapter;
@@ -237,19 +239,27 @@ public class EditAlarm extends AppCompatActivity {
     }
 
     void saveChanges() {
-        alarm.scheduleAlarm(getApplicationContext(),false);
+        //alarm.scheduleAlarm(getApplicationContext(),false);
         alarm.setAlarmName(newAlarmLabel);
         alarm.setHour(newHour);
         alarm.setMin(newMin);
         alarm.setTimeInString();
-        alarm.setCalendar(newHour,newMin);
+        alarm.setCalendar(newHour, newMin);
         alarm.setIsVibrate(newIsVibrate);
         alarm.setRingtonePath(newRingtonePath);
         alarm.setMilliseconds(newHour, newMin);
         alarm.setDifficulty(newDifficulty);
         Log.v("in edit alarm", "id: " + alarm.getAlarmId());
         alarmDatabase.updateData(alarm);
-        alarm.scheduleAlarm(getApplicationContext(),true);
+        cursor = alarmDatabase.sortQuery();
+        while(cursor.moveToNext()){
+            currentAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
+            if(currentAlarm.getIsActive() == true){
+                currentAlarm.scheduleAlarm(this,true);
+                break;
+            }
+        }
+        //alarm.scheduleAlarm(getApplicationContext(),true);
         //setResult(1, null);
         // this.finish();
     }
