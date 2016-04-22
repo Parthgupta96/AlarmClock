@@ -17,15 +17,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.undo.TimedUndoAdapter;
 
 import java.util.ArrayList;
 
@@ -47,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     TimeSelection selectTime;
     static CoordinatorLayout coordinatorLayout;
     TextView addAlarm;
-    ListView listView;
+    DynamicListView listView;
     String text = "";
     Cursor cursor;
     Alarm alarm;
@@ -73,10 +78,42 @@ public class MainActivity extends AppCompatActivity {
         activeAlarm = new ArrayList<>();
         addAlarm = (TextView) findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
-        listView = (ListView) findViewById(R.id.ListView);
+
+        listView = (DynamicListView) findViewById(R.id.ListView);
 
         mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, alarmsList);
-        listView.setAdapter(mAlarmAdapter);
+
+
+//        SimpleSwipeUndoAdapter simpleSwipeUndoAdapter = new SimpleSwipeUndoAdapter(mAlarmAdapter, this, new OnDismissCallback() {
+//            @Override
+//            public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
+//
+//            }
+//        });
+
+        TimedUndoAdapter timedUndoAdapter = new TimedUndoAdapter(mAlarmAdapter, this, new OnDismissCallback() {
+            @Override
+            public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
+                for(int i:reverseSortedPositions){
+                    alarmDatabase.deleteAlarm(alarmsList.get(i));
+                    updateListView();
+
+                }
+            }
+        });
+
+        AlphaInAnimationAdapter animationAdapter = new AlphaInAnimationAdapter(timedUndoAdapter);
+        animationAdapter.setAbsListView(listView);
+
+        listView.setAdapter(animationAdapter);
+//        simpleSwipeUndoAdapter.setAbsListView(listView);
+        //timedUndoAdapter.setAbsListView(listView);
+       // listView.setAdapter(timedUndoAdapter);
+        listView.enableSimpleSwipeUndo();
+
+
+
+        //listView.setAdapter(mAlarmAdapter);
 
         alarmDatabase = new AlarmDatabase(this);
         //cursor.moveToFirst();

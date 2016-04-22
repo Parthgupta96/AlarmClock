@@ -1,6 +1,7 @@
 package com.example.parth.alarmclock;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +10,15 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.undo.UndoAdapter;
+
 import java.util.ArrayList;
 
 /**
  * Created by Parth on 27-03-2016.
  */
 
-public class alarmAdapter extends ArrayAdapter<Alarm> {
+public class alarmAdapter extends ArrayAdapter<Alarm> implements UndoAdapter{
 private MainActivity main ;
     private ArrayList<Alarm> alarms;
     Context c;
@@ -29,6 +32,22 @@ private MainActivity main ;
         this.alarms = alarms;
         this.c = context;
         main = (MainActivity)context;
+    }
+
+    @NonNull
+    @Override
+    public View getUndoView(int position, View convertView, ViewGroup parent) {
+        View view = convertView;
+        if (view == null) {
+            view = LayoutInflater.from(c).inflate(R.layout.undo_row, parent, false);
+        }
+        return view;
+    }
+
+    @NonNull
+    @Override
+    public View getUndoClickView(@NonNull View view) {
+        return view.findViewById(R.id.undo_row_undobutton);
     }
 
 

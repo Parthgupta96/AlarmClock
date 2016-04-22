@@ -148,11 +148,16 @@ public class AlarmAlert extends AppCompatActivity {
     }
 
     public void clear(View view){
-        if(answerString.equals("")){}
+        if(answerString.equals("")){
+        }
         else {
             answerString = answerString.substring(0, answerString.length() - 1);
             answer.setText(answerString);
+            if(answerString.equals("")){
+                answer.setText("Answer");
+            }else{
             answer.setTextColor(oldColors);
+            }
         }
     }
 
