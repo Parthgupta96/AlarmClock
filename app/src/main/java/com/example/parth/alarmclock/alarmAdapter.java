@@ -1,7 +1,11 @@
 package com.example.parth.alarmclock;
 
 import android.content.Context;
+
 import android.support.annotation.NonNull;
+
+import android.database.Cursor;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +26,8 @@ public class alarmAdapter extends ArrayAdapter<Alarm> implements UndoAdapter{
 private MainActivity main ;
     private ArrayList<Alarm> alarms;
     Context c;
+    Alarm currentAlarm;
+    Cursor cursor;
 
 
     // public alarmAdapter(Context context,int resource, int id, ArrayList<String> AlarmList, ArrayList<String> AlarmNameList) {
@@ -100,13 +106,13 @@ private MainActivity main ;
                 //alarm.getAlarmId();
                 //alarm.setIsActive(!alarm.getIsActive());
                 if (alarm.getIsActive()) {//now inActive
-                    Log.v("in alarmAdapter", "will cancel alarm " + alarm.getIsActive());
-                    alarm.scheduleAlarm(getContext(),!alarm.getIsActive());
                 } else {
-                    alarm.scheduleAlarm(getContext(),!alarm.getIsActive());
+                    //alarm.scheduleAlarm(getContext(),!alarm.getIsActive());
+                    alarm.showSnackbar();
                 }
                 //alarmDatabase.updateData();
                 alarmDatabase.updateData(alarm,!alarm.getIsActive());
+                main.scheduleNextAlarm();
                 main.updateListView();
 
             }

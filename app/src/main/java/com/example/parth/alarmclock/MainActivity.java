@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     DynamicListView listView;
     String text = "";
     Cursor cursor;
-    Alarm alarm;
+    Alarm alarm, currentAlarm;
     Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
     int isActiveIndex;
     int isVibrateIndex;
@@ -96,8 +96,9 @@ public class MainActivity extends AppCompatActivity {
             public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
                 for(int i:reverseSortedPositions){
                     alarmDatabase.deleteAlarm(alarmsList.get(i));
-                    updateListView();
 
+                    scheduleNextAlarm();
+                    updateListView();
                 }
             }
         });
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 addNewAlarm();
             }
         });
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -144,19 +146,16 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final int t=i;
                 AlertDialog.Builder delete = new AlertDialog.Builder(MainActivity.this);
-                delete.setMessage("Delete -_-?");
+                delete.setMessage("Are you sure you want to Delete the alarm?");
 
                 delete.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //delete();
-                        alarm.scheduleAlarm(getApplicationContext(), false);
-                        Log.v(LOG_TAG, "" + getApplicationContext());
+                        //alarm.scheduleAlarm(getApplicationContext(), false);
                         alarmDatabase.deleteAlarm(alarmsList.get(t));
-//                        if(alarmsList.size()==1){
-//
-//                        }
                         updateListView();
+                        scheduleNextAlarm();
                         dialog.cancel();
 
                     }
@@ -191,12 +190,6 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             ringtone = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
         }
-// else if(resultCode == 1){
-//            Log.v(LOG_TAG, "List view updated");
-//            Intent refresh = new Intent(this, MainActivity.class);
-//            startActivity(refresh);
-//            this.finish();
-//        }
     }
 
     public void cancel(View view) {
@@ -225,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
             id = idTable + 1;
         }
         alarm.setCalendar(hours, min);
-       // alarm.setCoordinatorLayout(coordinatorLayout);
         alarm.showSnackbar();
         alarm.setAlarmName(text);
         alarm.setTimeInString();
@@ -238,44 +230,8 @@ public class MainActivity extends AppCompatActivity {
         //database
         alarmDatabase.insertToDB(alarm);
 
+        scheduleNextAlarm();
 
-
-//        Intent refresh = new Intent(this, MainActivity.class);
-//        startActivity(refresh);
-//        this.finish();
-
-
-        Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
-
-
-        Intent myIntent = new Intent(this, AlarmReceiver.class);
-        myIntent.putExtra("alarm", alarm);
-        count++;
-        pendingIntent = PendingIntent.getBroadcast(this, count, myIntent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
-
-//        Alarm alarm = getNext();
-//        if(alarm != null)
-            //alarm.scheduleAlarm(getApplicationContext());
-
-
-        alarm.scheduleAlarm(this,true);
-
-//        Intent myIntent = new Intent(this, AlarmReceiver.class);
-//        myIntent.putExtra("alarm", alarm);
-//        count++;
-//        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
-//        Log.v(LOG_TAG, "count: " + count);
-//        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
-//        cursor = alarmDataba.this);
-//        Alarm alarm = getNext();
-//        if(alarm != null)
-        //alarm.scheduleAlarm(getApplicationContext());
-
-        // alarmDatabase.viewData(this);
-
-        //        alarmsList.add(alarm);
-        //to arrange when new alarm is added
 
         updateListView();
 
@@ -331,7 +287,22 @@ public class MainActivity extends AppCompatActivity {
             addAlarm.setVisibility(View.VISIBLE);
         }
 
-//        alarmsList = alarmsList2;
+    }
+
+    public void scheduleNextAlarm(){
+        int flag = 0;
+        cursor = alarmDatabase.sortQuery();
+        while(cursor.moveToNext()){
+            currentAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
+            if(currentAlarm.getIsActive() == true){
+                currentAlarm.scheduleAlarm(this,true);
+                flag = 1;
+                break;
+            }
+        }
+        if(flag == 0) {
+            currentAlarm.scheduleAlarm(this, false);
+        }
     }
 
     protected void closeAlarm(View view) {

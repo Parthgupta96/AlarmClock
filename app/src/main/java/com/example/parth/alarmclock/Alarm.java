@@ -199,11 +199,31 @@ public class Alarm implements Serializable {
     void scheduleAlarm(Context context, boolean schedule) {
         Intent myIntent = new Intent(context, AlarmReceiver.class);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        setCalendar(getHour(), getMin());
+        calcTimeDifference(getHour(), getMin());
         myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  this.getAlarmId(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         if (schedule) {
-            showSnackbar();
+            //showSnackbar();
+            Log.v(LOG_TAG,"received context " + context);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
+        }else {
+            alarmManager.cancel(pendingIntent);
+        }
+
+    }
+
+    void scheduleAlarms(Context context, boolean schedule) {
+        Intent myIntent = new Intent(context, AlarmService.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        setCalendar(getHour(),getMin());
+        calcTimeDifference(getHour(), getMin());
+        myIntent.putExtra("alarm", this);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        if (schedule) {
+            //showSnackbar();
             Log.v(LOG_TAG,"received context " + context);
             alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
         }else {
