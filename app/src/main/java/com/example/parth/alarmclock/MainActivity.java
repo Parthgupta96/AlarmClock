@@ -1,7 +1,9 @@
 package com.example.parth.alarmclock;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.RingtoneManager;
@@ -15,21 +17,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.undo.TimedUndoAdapter;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
-    int count = 0;
 
     public static TimePicker time;
     static int hours;
@@ -39,79 +44,81 @@ public class MainActivity extends AppCompatActivity {
     static Button ringtonePathChanger;
     static Spinner difficultySpinner;
     public final String LOG_TAG = MainActivity.class.getSimpleName();
+    public AlarmDatabase alarmDatabase;
+    public ArrayList<Alarm> activeAlarm;
+    int count = 0;
+    int id = 0;
     AlarmManager alarmManager;
     TimeSelection selectTime;
-    CoordinatorLayout coordinatorLayout;
+    static CoordinatorLayout coordinatorLayout;
     TextView addAlarm;
-    ListView listView;
+    DynamicListView listView;
     String text = "";
     Cursor cursor;
-    AlarmDatabase alarmDatabase;
     Alarm alarm;
     Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-
-    int isActiveIndex ;
-    int isVibrateIndex ;
-    int HourIndex ;
-    int MinIndex ;
+    int isActiveIndex;
+    int isVibrateIndex;
+    int HourIndex;
+    int MinIndex;
     int AlarmNameIndex;
     int RingtonePathIndex;
-    Boolean noAlarm=true;
-
+    int idIndex;
+    Boolean noAlarm = true;
     int DifficultyIndex;
-
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         alarmsList = new ArrayList<>();
-
+        activeAlarm = new ArrayList<>();
         addAlarm = (TextView) findViewById(R.id.AddAlarm);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
-        listView = (ListView) findViewById(R.id.ListView);
 
-        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime,alarmsList);
-        listView.setAdapter(mAlarmAdapter);
+        listView = (DynamicListView) findViewById(R.id.ListView);
+
+        mAlarmAdapter = new alarmAdapter(this, R.layout.alarm_list_view, R.id.alarmTime, alarmsList);
+
+
+//        SimpleSwipeUndoAdapter simpleSwipeUndoAdapter = new SimpleSwipeUndoAdapter(mAlarmAdapter, this, new OnDismissCallback() {
+//            @Override
+//            public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
+//
+//            }
+//        });
+
+        TimedUndoAdapter timedUndoAdapter = new TimedUndoAdapter(mAlarmAdapter, this, new OnDismissCallback() {
+            @Override
+            public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
+                for(int i:reverseSortedPositions){
+                    alarmDatabase.deleteAlarm(alarmsList.get(i));
+                    updateListView();
+
+                }
+            }
+        });
+
+        AlphaInAnimationAdapter animationAdapter = new AlphaInAnimationAdapter(timedUndoAdapter);
+        animationAdapter.setAbsListView(listView);
+
+        listView.setAdapter(animationAdapter);
+//        simpleSwipeUndoAdapter.setAbsListView(listView);
+        //timedUndoAdapter.setAbsListView(listView);
+       // listView.setAdapter(timedUndoAdapter);
+        listView.enableSimpleSwipeUndo();
+
+
+
+        //listView.setAdapter(mAlarmAdapter);
 
         alarmDatabase = new AlarmDatabase(this);
-        cursor = alarmDatabase.getCursor();
-
-        if(cursor!=null){
-
-
-            while(cursor.moveToNext()){
-                if(noAlarm) {
-                    addAlarm.setVisibility(View.GONE);
-                    noAlarm = false;
-                }
-                alarm = new Alarm();
-
-                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
-                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
-                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
-                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
-//                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
-                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
-
-                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
-                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
-                alarm.setHour(cursor.getInt(HourIndex));
-                alarm.setMin(cursor.getInt(MinIndex));
-                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
-                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
-//                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
-                alarm.setTimeInString();
-
-                alarmsList.add(alarm);
-
-            }
-        }
+        //cursor.moveToFirst();
+        //updateListView();
+        //       alarmsList = alarmDatabase.getAllAlarms();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -126,15 +133,50 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(),EditAlarm.class);
-                intent.putExtra("alarm",alarmsList.get(position));
+                Intent intent = new Intent(getApplicationContext(), EditAlarm.class);
+                intent.putExtra("alarm", alarmsList.get(position));
                 startActivity(intent);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                final int t=i;
+                AlertDialog.Builder delete = new AlertDialog.Builder(MainActivity.this);
+                delete.setMessage("Delete -_-?");
+
+                delete.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //delete();
+                        alarm.scheduleAlarm(getApplicationContext(), false);
+                        Log.v(LOG_TAG, "" + getApplicationContext());
+                        alarmDatabase.deleteAlarm(alarmsList.get(t));
+//                        if(alarmsList.size()==1){
+//
+//                        }
+                        updateListView();
+                        dialog.cancel();
+
+                    }
+                });
+                delete.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+
+                    }
+                });
+                delete.show();
+
+                return true;
             }
         });
     }
 
-    public void ringtonePath(View view){
-        final Uri currentTone= RingtoneManager.getActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_ALARM);
+    public void ringtonePath(View view) {
+        final Uri currentTone = RingtoneManager.getActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_ALARM);
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
@@ -149,6 +191,12 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             ringtone = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
         }
+// else if(resultCode == 1){
+//            Log.v(LOG_TAG, "List view updated");
+//            Intent refresh = new Intent(this, MainActivity.class);
+//            startActivity(refresh);
+//            this.finish();
+//        }
     }
 
     public void cancel(View view) {
@@ -168,22 +216,37 @@ public class MainActivity extends AppCompatActivity {
         text = alarmLabel.getText().toString();
         Log.v(LOG_TAG, "after alarm name set");
 
-        alarm.setAlarm(hours, min, coordinatorLayout);
+        cursor = alarmDatabase.getCursor();
+//        cursor.moveToFirst();
+        if (cursor.moveToLast() == false) {
+            id = 1;
+        } else {
+            int idTable = cursor.getInt(0);
+            id = idTable + 1;
+        }
+        alarm.setCalendar(hours, min);
+       // alarm.setCoordinatorLayout(coordinatorLayout);
+        alarm.showSnackbar();
         alarm.setAlarmName(text);
         alarm.setTimeInString();
         alarm.setIsVibrate(vibrationSwitch.isChecked());
         alarm.setIsActive(Boolean.TRUE);
         alarm.setRingtonePath(ringtone.toString());
         alarm.setDifficulty(Alarm.Difficulty.valueOf(difficultySpinner.getSelectedItem().toString()));
+        alarm.setAlarmId(id);
 
-        mAlarmAdapter.notifyDataSetChanged();
-        alarmsList.add(alarm);
+        //database
+        alarmDatabase.insertToDB(alarm);
+
+
+
+//        Intent refresh = new Intent(this, MainActivity.class);
+//        startActivity(refresh);
+//        this.finish();
 
 
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
 
-        //database
-            alarmDatabase.insertToDB(alarm);
 
         Intent myIntent = new Intent(this, AlarmReceiver.class);
         myIntent.putExtra("alarm", alarm);
@@ -191,6 +254,30 @@ public class MainActivity extends AppCompatActivity {
         pendingIntent = PendingIntent.getBroadcast(this, count, myIntent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
 
+//        Alarm alarm = getNext();
+//        if(alarm != null)
+            //alarm.scheduleAlarm(getApplicationContext());
+
+
+        alarm.scheduleAlarm(this,true);
+
+//        Intent myIntent = new Intent(this, AlarmReceiver.class);
+//        myIntent.putExtra("alarm", alarm);
+//        count++;
+//        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
+//        Log.v(LOG_TAG, "count: " + count);
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+//        cursor = alarmDataba.this);
+//        Alarm alarm = getNext();
+//        if(alarm != null)
+        //alarm.scheduleAlarm(getApplicationContext());
+
+        // alarmDatabase.viewData(this);
+
+        //        alarmsList.add(alarm);
+        //to arrange when new alarm is added
+
+        updateListView();
 
         selectTime.dismiss();
 
@@ -198,15 +285,86 @@ public class MainActivity extends AppCompatActivity {
 
     public void addNewAlarm() {
         selectTime = new TimeSelection();
-        //selectTime.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         selectTime.show(getFragmentManager(), "Time Picker");
+    }
+
+    public void updateListView() {
+        mAlarmAdapter.notifyDataSetChanged();
+        alarmsList.clear();
+
+//        ArrayList<Alarm> alarmsList2 = new ArrayList<>();
+        cursor = alarmDatabase.sortQuery();
+        //cursor.moveToFirst();
+
+
+            while (cursor.moveToNext()) {
+                if (noAlarm) {
+                    addAlarm.setVisibility(View.GONE);
+                    noAlarm = false;
+                }
+                alarm = new Alarm();
+                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
+                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
+                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
+                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
+                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+                idIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
+
+                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
+                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
+                alarm.setHour(cursor.getInt(HourIndex));
+                alarm.setMin(cursor.getInt(MinIndex));
+                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
+                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
+                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
+                alarm.setTimeInString();
+                //alarm.setCoordinatorLayout(coordinatorLayout);
+                alarm.setAlarmId(cursor.getInt(idIndex));
+                alarm.setCalendar(alarm.getHour(),alarm.getMin());
+                alarmsList.add(alarm);
+                mAlarmAdapter.notifyDataSetChanged();
+
+            }
+        if(alarmsList.isEmpty()){
+            addAlarm.setVisibility(View.VISIBLE);
+        }
+
+//        alarmsList = alarmsList2;
     }
 
     protected void closeAlarm(View view) {
 
+    }
+
+    public static CoordinatorLayout getCoordinatorLayout() {
+        return coordinatorLayout;
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        alarmsList.clear();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateListView();
 
     }
+
+//    @Override
+//    protected void onRestart() {
+//        super.onRestart();
+//        mAlarmAdapter.notifyDataSetChanged();
+////        updateListView();
+////        Intent refresh = new Intent(this, MainActivity.class);
+////        startActivity(refresh);
+////        this.finish();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

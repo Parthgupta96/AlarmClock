@@ -19,14 +19,15 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
 
         Bundle bundle = intent.getExtras();
         Alarm alarm = (Alarm)bundle.getSerializable("alarm");
+        if(alarm.getIsActive()) {
+            Intent alarmIntend = new Intent(context, AlarmAlert.class);
+            Log.v(LOG_TAG, "Going to call ringing activity");
+            alarmIntend.putExtra("alarm", alarm);
+            alarmIntend.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            //startWakefulService(context, alarmIntend);
 
-        Intent alarmIntend = new Intent(context, AlarmAlert.class);
-        Log.v(LOG_TAG, "Going to call ringing activity");
-        alarmIntend.putExtra("alarm", alarm);
-        alarmIntend.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //startWakefulService(context, alarmIntend);
-
-        context.startActivity(alarmIntend);
+            context.startActivity(alarmIntend);
+        }
 
 
     }

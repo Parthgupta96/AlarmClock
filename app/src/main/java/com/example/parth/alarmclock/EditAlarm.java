@@ -10,14 +10,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import java.util.ArrayList;
 
 public class EditAlarm extends AppCompatActivity {
 
@@ -27,6 +34,7 @@ public class EditAlarm extends AppCompatActivity {
     TextView AlarmLabel;
     TextView alarmTime;
     Switch vibrate;
+    Spinner difficultySpinner;
     Ringtone oldRingtone;
     Ringtone newRingtone;
     int newHour;
@@ -39,12 +47,20 @@ public class EditAlarm extends AppCompatActivity {
     String oldRingtoneLabel;
     String defaultLabel = "Alarm Label";
     Boolean oldIsVibrate;
+    int oldDifficultyInt;
+    int newDifficultyInt;
     String newAlarmLabel;
     String newTime;
     String newRingtonePath;
     String newRingtoneLabel;
     Boolean newIsVibrate;
     Boolean changes = false;
+    Alarm.Difficulty oldDifficulty;
+    Alarm.Difficulty newDifficulty;
+    AlarmDatabase alarmDatabase;
+
+    static ArrayList<String> difficultyList;
+    static ArrayAdapter<String> difficultyLevelAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +70,17 @@ public class EditAlarm extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        alarmDatabase = new AlarmDatabase(this);
         alarm = (Alarm) getIntent().getSerializableExtra("alarm");
+        Log.v("Recd alarmin edit alarm", "id: " + alarm.getAlarmId());
+
+        difficultyList = new ArrayList<>();
+        difficultyList.add("Easy");
+        difficultyList.add("Medium");
+        difficultyList.add("Hard");
+        difficultyLevelAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficultyList);
+        difficultyLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 
         newAlarmLabel = oldAlarmLabel = alarm.getAlarmName();
         newTime = oldTime = alarm.getTimeInString();
@@ -64,11 +90,18 @@ public class EditAlarm extends AppCompatActivity {
         newRingtonePath = oldRingtonePath = alarm.getRingtonePath();
         oldRingtone = RingtoneManager.getRingtone(this, Uri.parse(oldRingtonePath));
         oldRingtoneLabel = oldRingtone.getTitle(this);
+        oldDifficulty = alarm.getDifficulty();
+        newDifficultyInt = oldDifficultyInt = oldDifficulty.ordinal();
 
         AlarmLabel = (TextView) findViewById(R.id.EditAlarmLabel);
         vibrate = (Switch) findViewById(R.id.EditVibrate);
         alarmTime = (TextView) findViewById(R.id.EditAlarmTime);
         ringtone = (TextView) findViewById(R.id.EditRingtone);
+        difficultySpinner = (Spinner)findViewById(R.id.editDifficultyLevel);
+
+        difficultySpinner.setAdapter(difficultyLevelAdapter);
+
+        difficultySpinner.setSelection(oldDifficultyInt);
 
         if (oldAlarmLabel.equals("")) {
             AlarmLabel.setText(defaultLabel);
@@ -94,7 +127,7 @@ public class EditAlarm extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         newAlarmLabel = label.getText().toString();
-                        if(!newAlarmLabel.equals(oldAlarmLabel)){
+                        if (!changes && !newAlarmLabel.equals(oldAlarmLabel)) {
                             changes = true;
                         }
                         AlarmLabel.setText(newAlarmLabel);
@@ -121,13 +154,12 @@ public class EditAlarm extends AppCompatActivity {
                 TimePickerDialog dialog = new TimePickerDialog(EditAlarm.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
                         newHour = hourOfDay;
                         newMin = minute;
                         newTime = getTimeInString(newHour, newMin);
                         alarmTime.setText(newTime);
-                        if(!oldTime.equals(newTime)){
-                           changes = true;
+                        if (!changes && !oldTime.equals(newTime)) {
+                            changes = true;
                         }
                     }
                 }, alarm.getHour(), alarm.getMin(), false);
@@ -142,20 +174,36 @@ public class EditAlarm extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 newIsVibrate = isChecked;
-                if(oldIsVibrate!=newIsVibrate){
+                if (!changes && oldIsVibrate != newIsVibrate) {
                     changes = true;
                 }
             }
         });
 
         ringtone.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
                 selectRingtone();
+            }
+        });
 
+        difficultySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+               newDifficulty= Alarm.Difficulty.valueOf(parent.getItemAtPosition(position).toString());
+
+                newDifficultyInt = newDifficulty.ordinal();
+                if(newDifficultyInt!=oldDifficultyInt){
+                    changes = true;
+                    //difficultySpinner.setSelection(newDifficultyInt);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
+
 
 
     }
@@ -170,12 +218,14 @@ public class EditAlarm extends AppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             newRingtoneUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
             newRingtonePath = newRingtoneUri.toString();
-            if(!newRingtonePath.equals(oldRingtonePath)){
+            if (!newRingtonePath.equals(oldRingtonePath)) {
                 changes = true;
             }
             newRingtone = RingtoneManager.getRingtone(this, Uri.parse(newRingtonePath));
@@ -187,13 +237,21 @@ public class EditAlarm extends AppCompatActivity {
     }
 
     void saveChanges() {
+        alarm.scheduleAlarm(getApplicationContext(),false);
         alarm.setAlarmName(newAlarmLabel);
         alarm.setHour(newHour);
         alarm.setMin(newMin);
         alarm.setTimeInString();
+        alarm.setCalendar(newHour,newMin);
         alarm.setIsVibrate(newIsVibrate);
         alarm.setRingtonePath(newRingtonePath);
-
+        alarm.setMilliseconds(newHour, newMin);
+        alarm.setDifficulty(newDifficulty);
+        Log.v("in edit alarm", "id: " + alarm.getAlarmId());
+        alarmDatabase.updateData(alarm);
+        alarm.scheduleAlarm(getApplicationContext(),true);
+        //setResult(1, null);
+        // this.finish();
     }
 
     String getTimeInString(int hour, int min) {
@@ -207,16 +265,38 @@ public class EditAlarm extends AppCompatActivity {
         } else {
             timeInString = "0";
             if (min > 9)
-                timeInString = hour + " : " + min;
+                timeInString += hour + " : " + min;
             else {
-                timeInString = hour + " : 0" + min;
+                timeInString += hour + " : 0" + min;
             }
         }
         return timeInString;
     }
 
+
+    public void showExitDialog() {
+        final AlertDialog.Builder exitConfirm = new AlertDialog.Builder(EditAlarm.this);
+        exitConfirm.setMessage("Save Changes ?");
+
+        exitConfirm.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                saveChanges();
+                supportFinishAfterTransition();
+            }
+        });
+        exitConfirm.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+            }
+        });
+        exitConfirm.show();
+    }
+
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (Integer.parseInt(android.os.Build.VERSION.SDK) > 5
                 && keyCode == KeyEvent.KEYCODE_BACK
                 && event.getRepeatCount() == 0) {
@@ -226,33 +306,24 @@ public class EditAlarm extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+
     @Override
     public void onBackPressed() {
-        if(changes){
-            final AlertDialog.Builder exitConfirm = new AlertDialog.Builder(EditAlarm.this);
-            exitConfirm.setMessage("Save Changes ?");
-
-            exitConfirm.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    saveChanges();
-                    supportFinishAfterTransition();
-                }
-            });
-            exitConfirm.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                    finish();
-                }
-            });
-            exitConfirm.show();
-
-        }else
-        {
-             super.onBackPressed();
+        if (changes) {
+            showExitDialog();
+        } else {
+            super.onBackPressed();
         }
+    }
 
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return (true);
+        }
+        return (super.onOptionsItemSelected(item));
     }
 }
