@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -27,12 +28,16 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.undo.TimedUndoAdapter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,10 +74,18 @@ public class MainActivity extends AppCompatActivity {
     alarmAdapter mAlarmAdapter;
     private PendingIntent pendingIntent;
     private ArrayList<Alarm> alarmsList;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= 21) {
+            //getWindow().setSharedElementExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_exit));
+        }
         setContentView(R.layout.activity_main);
         alarmsList = new ArrayList<>();
         activeAlarm = new ArrayList<>();
@@ -94,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         TimedUndoAdapter timedUndoAdapter = new TimedUndoAdapter(mAlarmAdapter, this, new OnDismissCallback() {
             @Override
             public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
-                for(int i:reverseSortedPositions){
+                for (int i : reverseSortedPositions) {
                     alarmDatabase.deleteAlarm(alarmsList.get(i));
 
                     scheduleNextAlarm();
@@ -109,9 +122,8 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(animationAdapter);
 //        simpleSwipeUndoAdapter.setAbsListView(listView);
         //timedUndoAdapter.setAbsListView(listView);
-       // listView.setAdapter(timedUndoAdapter);
+        // listView.setAdapter(timedUndoAdapter);
         listView.enableSimpleSwipeUndo();
-
 
 
         //listView.setAdapter(mAlarmAdapter);
@@ -137,14 +149,21 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), EditAlarm.class);
                 intent.putExtra("alarm", alarmsList.get(position));
+                //@TargetApi(21)
+//                if(Build.VERSION.SDK_INT>=21){
+//                    view.setTransitionName("ListClick");
+//                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,view,view.getTransitionName());
+//                    startActivity(intent,optionsCompat.toBundle());
+
                 startActivity(intent);
+
             }
         });
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final int t=i;
+                final int t = i;
                 AlertDialog.Builder delete = new AlertDialog.Builder(MainActivity.this);
                 delete.setMessage("Are you sure you want to Delete the alarm?");
 
@@ -172,6 +191,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     public void ringtonePath(View view) {
@@ -221,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
         alarm.showSnackbar();
         alarm.setAlarmName(text);
         alarm.setTimeInString();
+        // alarm.setMilliseconds(hours,min);
         alarm.setIsVibrate(vibrationSwitch.isChecked());
         alarm.setIsActive(Boolean.TRUE);
         alarm.setRingtonePath(ringtone.toString());
@@ -253,54 +276,57 @@ public class MainActivity extends AppCompatActivity {
         //cursor.moveToFirst();
 
 
-            while (cursor.moveToNext()) {
-                if (noAlarm) {
-                    addAlarm.setVisibility(View.GONE);
-                    noAlarm = false;
-                }
-                alarm = new Alarm();
-                isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
-                isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
-                HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
-                MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
-                AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
-                DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
-                RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
-                idIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
-
-                alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
-                alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
-                alarm.setHour(cursor.getInt(HourIndex));
-                alarm.setMin(cursor.getInt(MinIndex));
-                alarm.setAlarmName(cursor.getString(AlarmNameIndex));
-                alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
-                alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
-                alarm.setTimeInString();
-                //alarm.setCoordinatorLayout(coordinatorLayout);
-                alarm.setAlarmId(cursor.getInt(idIndex));
-                alarm.setCalendar(alarm.getHour(),alarm.getMin());
-                alarmsList.add(alarm);
-                mAlarmAdapter.notifyDataSetChanged();
-
+        while (cursor.moveToNext()) {
+            if (noAlarm) {
+                addAlarm.setVisibility(View.GONE);
+                noAlarm = false;
             }
-        if(alarmsList.isEmpty()){
+            alarm = new Alarm();
+            isActiveIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISACTIVE);
+            isVibrateIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ISVIBRATE);
+            HourIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_HOUR);
+            MinIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_MIN);
+            AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
+            DifficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
+            RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
+            idIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
+            int timeInMilliIndex =cursor.getColumnIndex(AlarmDatabase.COLUMN_TIMEINMILLIS);
+            Log.v(LOG_TAG,+cursor.getInt(timeInMilliIndex)+"");
+            alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
+            alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
+            alarm.setHour(cursor.getInt(HourIndex));
+            alarm.setMin(cursor.getInt(MinIndex));
+            alarm.setAlarmName(cursor.getString(AlarmNameIndex));
+            alarm.setRingtonePath(cursor.getString(RingtonePathIndex));
+            alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(DifficultyIndex)]);
+            alarm.setTimeInString();
+            //alarm.setCoordinatorLayout(coordinatorLayout);
+            alarm.setAlarmId(cursor.getInt(idIndex));
+            alarm.setCalendar(alarm.getHour(), alarm.getMin());
+            alarmsList.add(alarm);
+            mAlarmAdapter.notifyDataSetChanged();
+
+        }
+        if (alarmsList.isEmpty()) {
             addAlarm.setVisibility(View.VISIBLE);
         }
 
     }
 
-    public void scheduleNextAlarm(){
+    public void scheduleNextAlarm() {
         int flag = 0;
         cursor = alarmDatabase.sortQuery();
-        while(cursor.moveToNext()){
+        Calendar current = Calendar.getInstance();
+        int currentTime = current.get(Calendar.HOUR_OF_DAY) * 100 + current.get(Calendar.MINUTE);
+        while (cursor.moveToNext()) {
             currentAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
-            if(currentAlarm.getIsActive() == true){
-                currentAlarm.scheduleAlarm(this,true);
+            if (currentAlarm.getIsActive() == true && currentAlarm.getMilliseconds() >= currentTime) {
+                currentAlarm.scheduleAlarm(this, true);
                 flag = 1;
                 break;
             }
         }
-        if(flag == 0) {
+        if (flag == 0) {
             currentAlarm.scheduleAlarm(this, false);
         }
     }
@@ -358,5 +384,45 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.parth.alarmclock/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.parth.alarmclock/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }

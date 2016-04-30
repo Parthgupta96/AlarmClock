@@ -144,11 +144,7 @@ public class Alarm implements Serializable {
 
     void setMilliseconds(int hour, int min) {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, min);
-        calendar.set(Calendar.SECOND, 000);
-        milliseconds = calendar.getTimeInMillis();
+        this.milliseconds = hour*100+min;
 
     }
 
@@ -191,7 +187,7 @@ public class Alarm implements Serializable {
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 000);
 
-        milliseconds = calendar.getTimeInMillis();
+        milliseconds = hour*100+min;
         setMilliseconds(milliseconds);
         Log.v(LOG_TAG, "" + milliseconds);
     }

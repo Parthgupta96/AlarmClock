@@ -30,7 +30,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
     static final String COLUMN_TIMEINSTRING = "time_in_string";
     static final String COLUMN_TIMEINMILLIS = "time_in_millis";
 //    static final String COLUMN_ROWID = "row_id";
-    static final String createTable = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_ALARMNAME + " TEXT, " + COLUMN_ISACTIVE + " VARCHAR(255), " + COLUMN_ISVIBRATE + " VARCHAR(255), " + COLUMN_HOUR + " VARCHAR(255), " + COLUMN_MIN + " VARCHAR(255), " + COLUMN_DIFFICULTY + " VARCHAR(255), " + COLUMN_RINGTONEPATH + " VARCHAR(255), " + COLUMN_TIMEINMILLIS + " VARCHAR(255));";
+    static final String createTable = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_ALARMNAME + " TEXT, " + COLUMN_ISACTIVE + " VARCHAR(255), " + COLUMN_ISVIBRATE + " VARCHAR(255), " + COLUMN_HOUR + " VARCHAR(255), " + COLUMN_MIN + " VARCHAR(255), " + COLUMN_DIFFICULTY + " VARCHAR(255), " + COLUMN_RINGTONEPATH + " VARCHAR(255), " + COLUMN_TIMEINMILLIS + " INTEGER);";
     static final String deleteTable = "DROPTABLE IF EXISTES " + TABLE_NAME;
 
     public AlarmDatabase(Context context) {
@@ -105,7 +105,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
     public Alarm getAlarm(int id) {
         // TODO Auto-generated method stub
         SQLiteDatabase db = this.getReadableDatabase();
-        String columns[] ={COLUMN_UID,COLUMN_ISACTIVE,COLUMN_ISVIBRATE,COLUMN_HOUR,COLUMN_MIN,COLUMN_ALARMNAME,COLUMN_RINGTONEPATH,COLUMN_DIFFICULTY};
+        String columns[] ={COLUMN_UID,COLUMN_ISACTIVE,COLUMN_ISVIBRATE,COLUMN_HOUR,COLUMN_MIN,COLUMN_ALARMNAME,COLUMN_RINGTONEPATH,COLUMN_DIFFICULTY,COLUMN_TIMEINMILLIS};
         Cursor cursor = db.query(TABLE_NAME, columns, COLUMN_UID+"="+id, null, null, null, null);
         Alarm alarm = null;
 
@@ -117,6 +117,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         int ringtonePathIndex;
         int idTable;
         int difficultyIndex;
+        int milliSecondsIndex;
         String string = "";
         cursor.moveToFirst();
         if(cursor.moveToFirst()){
@@ -129,6 +130,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             AlarmNameIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_ALARMNAME);
             ringtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
             difficultyIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_DIFFICULTY);
+            milliSecondsIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_TIMEINMILLIS);
 
             alarm.setAlarmName(cursor.getString(AlarmNameIndex));
             alarm.setIsVibrate(cursor.getInt(isVibrateIndex) == 1);
@@ -138,6 +140,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
             alarm.setMin(cursor.getInt(MinIndex));
             alarm.setAlarmId(cursor.getInt(idTable));
             alarm.setDifficulty(Alarm.Difficulty.values()[cursor.getInt(difficultyIndex)]);
+            alarm.setMilliseconds(cursor.getInt(milliSecondsIndex));
         }
         cursor.close();
         return alarm;
