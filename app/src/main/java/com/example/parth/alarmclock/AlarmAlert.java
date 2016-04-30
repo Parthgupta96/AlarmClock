@@ -1,6 +1,8 @@
 package com.example.parth.alarmclock;
 
 import android.app.ActionBar;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -23,6 +25,7 @@ import java.io.IOException;
 public class AlarmAlert extends AppCompatActivity {
 
     public MediaPlayer mediaPlayer;
+    AudioManager am;
     Vibrator vibrator;
     Vibrator wrongAnsVibrator;
     Alarm alarm, currentAlarm;
@@ -30,6 +33,7 @@ public class AlarmAlert extends AppCompatActivity {
     TextView question;
     String questionString;
     String actualAnswer;
+    String diff;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
     String answerString = "";
     ColorStateList oldColors;
@@ -52,24 +56,37 @@ public class AlarmAlert extends AppCompatActivity {
         answer = (TextView) findViewById(R.id.answer);
 
         oldColors =  answer.getTextColors();
-        String diff = alarm.getDifficulty().toString();
+        diff = alarm.getDifficulty().toString();
         questionString = GenerateMathsQuestion.generateQuestion(diff);
         question.setText(questionString);
         actualAnswer = EvaluateString.evaluate(questionString);
+        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setVolume(1.0f, 1.0f);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+//// Request audio focus for playback
+        int result = am.requestAudioFocus(focusChangeListener,
+//// Use the music stream.
+               AudioManager.STREAM_MUSIC,
+//// Request permanent focus.
+               AudioManager.AUDIOFOCUS_GAIN);
+//
 
-        try {
-            mediaPlayer.setDataSource(this,Uri.parse(alarm.getRingtonePath()));
-            mediaPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+// other app had stopped playing song now , so u can do u stuff now .
+//        }
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setVolume(1.0f, 1.0f);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+
+            try {
+                mediaPlayer.setDataSource(this, Uri.parse(alarm.getRingtonePath()));
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mediaPlayer.start();
         }
-
-        mediaPlayer.start();
 
         if(alarm.getIsVibrate()) {
             vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -165,6 +182,15 @@ public class AlarmAlert extends AppCompatActivity {
         }
     }
 
+    public void refreshQuestion(View view){
+        questionString = GenerateMathsQuestion.generateQuestion(diff);
+        question.setText(questionString);
+        actualAnswer = EvaluateString.evaluate(questionString);
+        answerString = "";
+        answer.setText("Answer");
+        answer.setTextColor(oldColors);
+    }
+
     protected void unlockScreen(){
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
@@ -181,6 +207,7 @@ public class AlarmAlert extends AppCompatActivity {
             vibrator.cancel();
         Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
+//        am.abandonAudioFocus(focusChangeListener);
         Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
         alarm.setIsActive(false);
         alarmDatabase.updateData(alarm);
@@ -196,19 +223,38 @@ public class AlarmAlert extends AppCompatActivity {
                 }
             }
         }
-//        AlarmDatabase alarmDatabase = new AlarmDatabase(this);
-//        Cursor cursor = alarmDatabase.sortQuery();
-//        while(cursor.moveToNext()){
-//            if((alarm.getAlarmId().equals("" + cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID))))){
-//                break;
-//            }
-//            cursor.moveToNext();
-//            Alarm newAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
-//            newAlarm.scheduleAlarm(this);
-//        }
-
         this.finish();
     }
+
+    private AudioManager.OnAudioFocusChangeListener focusChangeListener =
+            new AudioManager.OnAudioFocusChangeListener() {
+                public void onAudioFocusChange(int focusChange) {
+                    am =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
+                    switch (focusChange) {
+
+                        case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) :
+                            // Lower the volume while ducking.
+                            mediaPlayer.setVolume(0.2f, 0.2f);
+                            break;
+                        case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) :
+                            mediaPlayer.pause();
+                            break;
+
+                        case (AudioManager.AUDIOFOCUS_LOSS) :
+//                            if(mediaPlayer.isPlaying())
+//                                mediaPlayer.stop();
+                            am.abandonAudioFocus(focusChangeListener);
+                            break;
+
+                        case (AudioManager.AUDIOFOCUS_GAIN) :
+                            // Return the volume to normal and resume if paused.
+                            mediaPlayer.setVolume(1f, 1f);
+                            mediaPlayer.start();
+                            break;
+                        default: break;
+                    }
+                }
+            };
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         ActionBar actionBar = getActionBar();
@@ -219,5 +265,15 @@ public class AlarmAlert extends AppCompatActivity {
         }
         return super.onCreateOptionsMenu(menu);
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        ActivityManager activityManager = (ActivityManager) getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
+
+        activityManager.moveTaskToFront(getTaskId(), 0);
     }
 }

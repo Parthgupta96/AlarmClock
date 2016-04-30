@@ -3,6 +3,7 @@
     package="com.example.parth.alarmclock">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <application
         android:allowBackup="true"
@@ -49,15 +50,18 @@
             android:name=".AlarmReceiver"
             android:enabled="true" />
 
-        <service
-            android:name=".AlarmService"
-            android:enabled="true"
-            android:exported="true"></service>
-        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+
+        <!--<service-->
+            <!--android:name=".AlarmService"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="true"></service>-->
+        <!--&lt;!&ndash; ATTENTION: This was auto-generated to add Google Play services to your project for-->
+             <!--App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. &ndash;&gt;-->
+        <!--<meta-data-->
+            <!--android:name="com.google.android.gms.version"-->
+            <!--android:value="@integer/google_play_services_version" />-->
+
+
     </application>
 
 </manifest>

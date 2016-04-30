@@ -35,7 +35,7 @@ public class GenerateMathsQuestion {
             operations = operand.nextInt(2-0) + 0;
             question = question + " " + getOperator(operations);
         }
-        question = question.substring(0,question.length()-1);
+        question = question.substring(1,question.length()-1);
         return question;
 
     }

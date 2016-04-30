@@ -129,10 +129,6 @@ public class MainActivity extends AppCompatActivity {
         //listView.setAdapter(mAlarmAdapter);
 
         alarmDatabase = new AlarmDatabase(this);
-        //cursor.moveToFirst();
-        //updateListView();
-        //       alarmsList = alarmDatabase.getAllAlarms();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -215,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void cancel(View view) {
-
         selectTime.dismiss();
     }
 
@@ -253,8 +248,25 @@ public class MainActivity extends AppCompatActivity {
         //database
         alarmDatabase.insertToDB(alarm);
 
-        scheduleNextAlarm();
 
+        scheduleNextAlarm();
+        //alarm.scheduleAlarm(this,true);
+
+//        Intent myIntent = new Intent(this, AlarmReceiver.class);
+//        myIntent.putExtra("alarm", alarm);
+//        count++;
+//        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
+//        Log.v(LOG_TAG, "count: " + count);
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
+//        cursor = alarmDataba.this);
+//        Alarm alarm = getNext();
+//        if(alarm != null)
+        //alarm.scheduleAlarm(getApplicationContext());
+
+        // alarmDatabase.viewData(this);
+
+        //        alarmsList.add(alarm);
+        //to arrange when new alarm is added
 
         updateListView();
 
