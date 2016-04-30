@@ -3,6 +3,7 @@
     package="com.example.parth.alarmclock">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <application
         android:allowBackup="true"
@@ -49,10 +50,6 @@
             android:name=".AlarmReceiver"
             android:enabled="true" />
 
-        <service
-            android:name=".AlarmService"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>
