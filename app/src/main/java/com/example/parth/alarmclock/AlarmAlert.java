@@ -33,6 +33,7 @@ public class AlarmAlert extends AppCompatActivity {
     TextView question;
     String questionString;
     String actualAnswer;
+    String diff;
     private final String LOG_TAG = AlarmAlert.class.getSimpleName();
     String answerString = "";
     ColorStateList oldColors;
@@ -55,7 +56,7 @@ public class AlarmAlert extends AppCompatActivity {
         answer = (TextView) findViewById(R.id.answer);
 
         oldColors =  answer.getTextColors();
-        String diff = alarm.getDifficulty().toString();
+        diff = alarm.getDifficulty().toString();
         questionString = GenerateMathsQuestion.generateQuestion(diff);
         question.setText(questionString);
         actualAnswer = EvaluateString.evaluate(questionString);
@@ -174,6 +175,15 @@ public class AlarmAlert extends AppCompatActivity {
             answer.setText(answerString);
             answer.setTextColor(oldColors);
         }
+    }
+
+    public void refreshQuestion(View view){
+        questionString = GenerateMathsQuestion.generateQuestion(diff);
+        question.setText(questionString);
+        actualAnswer = EvaluateString.evaluate(questionString);
+        answerString = "";
+        answer.setText("Answer");
+        answer.setTextColor(oldColors);
     }
 
     protected void unlockScreen(){

@@ -79,10 +79,6 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(mAlarmAdapter);
 
         alarmDatabase = new AlarmDatabase(this);
-        //cursor.moveToFirst();
-        //updateListView();
-        //       alarmsList = alarmDatabase.getAllAlarms();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -151,16 +147,9 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             ringtone = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
         }
-// else if(resultCode == 1){
-//            Log.v(LOG_TAG, "List view updated");
-//            Intent refresh = new Intent(this, MainActivity.class);
-//            startActivity(refresh);
-//            this.finish();
-//        }
     }
 
     public void cancel(View view) {
-
         selectTime.dismiss();
     }
 
@@ -198,31 +187,8 @@ public class MainActivity extends AppCompatActivity {
         //database
         alarmDatabase.insertToDB(alarm);
 
-
-
-//        Intent refresh = new Intent(this, MainActivity.class);
-//        startActivity(refresh);
-//        this.finish();
-
-
         Log.v(LOG_TAG, "After ok pressed value of hour " + hours + min);
         scheduleNextAlarm();
-        //alarm.scheduleAlarm(this,true);
-
-//        Intent myIntent = new Intent(this, AlarmReceiver.class);
-//        myIntent.putExtra("alarm", alarm);
-//        count++;
-//        pendingIntent = PendingIntent.getBroadcast(this, (int) alarm.getMilliseconds(), myIntent, 0);
-//        Log.v(LOG_TAG, "count: " + count);
-//        alarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getCalendar().getTimeInMillis(), pendingIntent);
-//        cursor = alarmDataba.this);
-//        Alarm alarm = getNext();
-//        if(alarm != null)
-        //alarm.scheduleAlarm(getApplicationContext());
-
-        // alarmDatabase.viewData(this);
-
-        //        alarmsList.add(alarm);
         //to arrange when new alarm is added
 
         updateListView();
