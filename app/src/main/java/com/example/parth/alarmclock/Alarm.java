@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -83,7 +82,7 @@ public class Alarm implements Serializable {
 
     void setAlarmName(String name) {
         this.alarmName = name;
-        Log.v(LOG_TAG, "alarm name set" + alarmName);
+       // Log.v(LOG_TAG, "alarm name set" + alarmName);
     }
 
     String getRingtonePath() {
@@ -189,7 +188,7 @@ public class Alarm implements Serializable {
 
         milliseconds = hour*100+min;
         setMilliseconds(milliseconds);
-        Log.v(LOG_TAG, "" + milliseconds);
+       // Log.v(LOG_TAG, "" + milliseconds);
     }
 
     void scheduleAlarm(Context context, boolean schedule) {
@@ -202,7 +201,7 @@ public class Alarm implements Serializable {
 
         if (schedule) {
             //showSnackbar();
-            Log.v(LOG_TAG,"received context " + context);
+           // Log.v(LOG_TAG,"received context " + context);
             alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
         }else {
             alarmManager.cancel(pendingIntent);

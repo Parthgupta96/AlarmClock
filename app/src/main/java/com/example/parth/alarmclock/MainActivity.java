@@ -12,9 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.transition.TransitionInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -84,7 +85,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (Build.VERSION.SDK_INT >= 21) {
-            //getWindow().setSharedElementExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_exit));
+
+            getWindow().setSharedElementExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.time_shared_transition));
+            getWindow().setSharedElementEnterTransition(null);
+            //getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_exit_transition));
+            getWindow().setSharedElementReturnTransition(null);
+            getWindow().setSharedElementReenterTransition(null);
         }
         setContentView(R.layout.activity_main);
         alarmsList = new ArrayList<>();
@@ -146,12 +152,19 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), EditAlarm.class);
                 intent.putExtra("alarm", alarmsList.get(position));
                 //@TargetApi(21)
-//                if(Build.VERSION.SDK_INT>=21){
-//                    view.setTransitionName("ListClick");
-//                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,view,view.getTransitionName());
-//                    startActivity(intent,optionsCompat.toBundle());
-
-                startActivity(intent);
+                if(Build.VERSION.SDK_INT>=21) {
+//                    Slide slide = new Slide();
+//                    slide.setDuration(800);
+//                    slide.setSlideEdge(Gravity.BOTTOM);
+//                    TransitionManager.beginDelayedTransition(parent,slide);
+                    view.setTransitionName("ListClick");
+                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this, view, view.getTransitionName());
+                    startActivity(intent, optionsCompat.toBundle());
+                    //overridePendingTransition(R.transition.edit_alarm_enter,R.transition.main_exit_transition);
+                }else{
+                    startActivity(intent);
+                }
+//                startActivity(intent);
 
             }
         });
@@ -224,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
         hours = time.getCurrentHour();
         min = time.getCurrentMinute();
         text = alarmLabel.getText().toString();
-        Log.v(LOG_TAG, "after alarm name set");
+       // Log.v(LOG_TAG, "after alarm name set");
 
         cursor = alarmDatabase.getCursor();
 //        cursor.moveToFirst();
@@ -303,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
             RingtonePathIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_RINGTONEPATH);
             idIndex = cursor.getColumnIndex(AlarmDatabase.COLUMN_UID);
             int timeInMilliIndex =cursor.getColumnIndex(AlarmDatabase.COLUMN_TIMEINMILLIS);
-            Log.v(LOG_TAG,+cursor.getInt(timeInMilliIndex)+"");
+           // Log.v(LOG_TAG,+cursor.getInt(timeInMilliIndex)+"");
             alarm.setIsActive(1 == cursor.getInt(isActiveIndex));
             alarm.setIsVibrate(1 == cursor.getInt(isVibrateIndex));
             alarm.setHour(cursor.getInt(HourIndex));

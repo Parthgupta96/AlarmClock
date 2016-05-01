@@ -12,11 +12,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
 import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,6 +35,8 @@ import java.util.ArrayList;
 
 public class EditAlarm extends AppCompatActivity {
 
+    static ArrayList<String> difficultyList;
+    static ArrayAdapter<String> difficultyLevelAdapter;
     Alarm alarm, currentAlarm;
     TextView ringtone;
     Uri newRingtoneUri;
@@ -61,16 +67,21 @@ public class EditAlarm extends AppCompatActivity {
     Alarm.Difficulty oldDifficulty;
     Alarm.Difficulty newDifficulty;
     AlarmDatabase alarmDatabase;
+    ViewGroup edit;
     Cursor cursor;
-
-    static ArrayList<String> difficultyList;
-    static ArrayAdapter<String> difficultyLevelAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT>=21){
-            getWindow().setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_exit));
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.time_shared_transition));
+            getWindow().setSharedElementExitTransition(null);
+            getWindow().setSharedElementReturnTransition(null);
+            getWindow().setEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.edit_alarm_enter));
+            getWindow().setAllowReturnTransitionOverlap(false);
+            getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.edit_alarm_exit));
+//   getWindow().setReturnTransition(null);
+            //getWindow().setSharedElementReenterTransition(null);
         }
         setContentView(R.layout.activity_edit_alarm);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar1);
@@ -100,11 +111,12 @@ public class EditAlarm extends AppCompatActivity {
         oldDifficulty = alarm.getDifficulty();
         newDifficultyInt = oldDifficultyInt = oldDifficulty.ordinal();
 
+        edit = (ViewGroup) findViewById(R.id.EditViewGroup);
         AlarmLabel = (TextView) findViewById(R.id.EditAlarmLabel);
         vibrate = (Switch) findViewById(R.id.EditVibrate);
         alarmTime = (TextView) findViewById(R.id.EditAlarmTime);
         ringtone = (TextView) findViewById(R.id.EditRingtone);
-        difficultySpinner = (Spinner)findViewById(R.id.editDifficultyLevel);
+        difficultySpinner = (Spinner) findViewById(R.id.editDifficultyLevel);
 
         difficultySpinner.setAdapter(difficultyLevelAdapter);
 
@@ -196,10 +208,10 @@ public class EditAlarm extends AppCompatActivity {
         difficultySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-               newDifficulty= Alarm.Difficulty.valueOf(parent.getItemAtPosition(position).toString());
+                newDifficulty = Alarm.Difficulty.valueOf(parent.getItemAtPosition(position).toString());
 
                 newDifficultyInt = newDifficulty.ordinal();
-                if(newDifficultyInt!=oldDifficultyInt){
+                if (newDifficultyInt != oldDifficultyInt) {
                     changes = true;
                     //difficultySpinner.setSelection(newDifficultyInt);
                 }
@@ -210,7 +222,6 @@ public class EditAlarm extends AppCompatActivity {
 
             }
         });
-
 
 
     }
@@ -224,7 +235,6 @@ public class EditAlarm extends AppCompatActivity {
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
         startActivityForResult(intent, 0);
     }
-
 
 
     @Override
@@ -250,6 +260,8 @@ public class EditAlarm extends AppCompatActivity {
         alarm.setMin(newMin);
         alarm.setIsActive(true);
         alarm.setTimeInString();
+        alarm.calcTimeDifference(newHour, newMin);
+        alarm.showSnackbar();
         alarm.setCalendar(newHour, newMin);
         alarm.setIsVibrate(newIsVibrate);
         alarm.setRingtonePath(newRingtonePath);
@@ -258,10 +270,10 @@ public class EditAlarm extends AppCompatActivity {
         Log.v("in edit alarm", "id: " + alarm.getAlarmId());
         alarmDatabase.updateData(alarm);
         cursor = alarmDatabase.sortQuery();
-        while(cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             currentAlarm = alarmDatabase.getAlarm(cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID)));
-            if(currentAlarm.getIsActive() == true){
-                currentAlarm.scheduleAlarm(this,true);
+            if (currentAlarm.getIsActive() == true) {
+                currentAlarm.scheduleAlarm(this, true);
                 break;
             }
         }
@@ -290,6 +302,16 @@ public class EditAlarm extends AppCompatActivity {
     }
 
 
+    public void removeViewGroup(){
+        if(Build.VERSION.SDK_INT>=21){
+            Slide slide = new Slide();
+            slide.setSlideEdge(Gravity.TOP);
+            slide.setDuration(300);
+            TransitionManager.beginDelayedTransition(edit,slide);
+            edit.setVisibility(View.GONE);
+        }
+    }
+
     public void showExitDialog() {
         final AlertDialog.Builder exitConfirm = new AlertDialog.Builder(EditAlarm.this);
         exitConfirm.setMessage("Save Changes ?");
@@ -298,6 +320,7 @@ public class EditAlarm extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 saveChanges();
+                removeViewGroup();
                 supportFinishAfterTransition();
             }
         });
@@ -305,6 +328,7 @@ public class EditAlarm extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                removeViewGroup();
                 finish();
             }
         });
@@ -328,6 +352,7 @@ public class EditAlarm extends AppCompatActivity {
         if (changes) {
             showExitDialog();
         } else {
+            removeViewGroup();
             super.onBackPressed();
         }
     }

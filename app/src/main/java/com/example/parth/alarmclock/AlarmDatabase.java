@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -52,26 +51,26 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         long change = db.insert(TABLE_NAME,null,contentValues);
         if(change<1){
-            Log.v(LOG_TAG,"no change");
+            //Log.v(LOG_TAG,"no change");
         }
-        Log.v(LOG_TAG, "name: " + alarm.getAlarmName());
-        Log.v(LOG_TAG, "id: " + alarm.getAlarmId());
+        //Log.v(LOG_TAG, "name: " + alarm.getAlarmName());
+        //Log.v(LOG_TAG, "id: " + alarm.getAlarmId());
         db.close();
     }
 
     public void updateData(Alarm alarm, boolean status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        Log.v("in updateData ", "id: " + alarm.getAlarmId());
+       // Log.v("in updateData ", "id: " + alarm.getAlarmId());
         contentValues.put(COLUMN_ISACTIVE, status?1:0);
         db.update(TABLE_NAME, contentValues, "_id = ?", new String[]{("" + alarm.getAlarmId())});
-        Log.v(LOG_TAG, "updated");
+        //Log.v(LOG_TAG, "updated");
 
     }
         public void updateData(Alarm alarm){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        Log.v("in updateData ", "id: " + alarm.getAlarmId());
+       // Log.v("in updateData ", "id: " + alarm.getAlarmId());
         contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate()==true?1:0));
         contentValues.put(COLUMN_ISACTIVE,(alarm.getIsActive()==true?1:0));
         contentValues.put(COLUMN_HOUR,alarm.getHour());
@@ -81,7 +80,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         contentValues.put(COLUMN_DIFFICULTY, alarm.getDifficulty().ordinal());
         contentValues.put(COLUMN_TIMEINMILLIS, alarm.getMilliseconds());
         db.update(TABLE_NAME, contentValues, "_id = ?", new String[]{("" + alarm.getAlarmId())});
-        Log.v(LOG_TAG, "updated");
+        //Log.v(LOG_TAG, "updated");
     }
 
     public Cursor getCursor(){

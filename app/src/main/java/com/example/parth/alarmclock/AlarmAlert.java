@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -43,7 +42,7 @@ public class AlarmAlert extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(LOG_TAG, "in AlarmAlert");
+       // Log.v(LOG_TAG, "in AlarmAlert");
         unlockScreen();
         setContentView(R.layout.activity_alarm_alert);
 
@@ -201,21 +200,21 @@ public class AlarmAlert extends AppCompatActivity {
     }
 
     public void closeAlarm(){
-        Log.v(LOG_TAG, "will now stop");
+//        Log.v(LOG_TAG, "will now stop");
         mediaPlayer.stop();
         if(vibrator!=null)
             vibrator.cancel();
-        Log.v(LOG_TAG, "will now release");
+//        Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
 //        am.abandonAudioFocus(focusChangeListener);
-        Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
+//        Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
         alarm.setIsActive(false);
         alarmDatabase.updateData(alarm);
         cursor = alarmDatabase.sortQuery();
         while(cursor.moveToNext()){
             int id = cursor.getInt(cursor.getColumnIndex(AlarmDatabase.COLUMN_UID));
             currentAlarm = alarmDatabase.getAlarm(id);
-            Log.v(LOG_TAG, "id of next alarm " + id);
+//            Log.v(LOG_TAG, "id of next alarm " + id);
             if(currentAlarm != null) {
                 if (currentAlarm.getIsActive() == true) {
                     currentAlarm.scheduleAlarm(this, true);

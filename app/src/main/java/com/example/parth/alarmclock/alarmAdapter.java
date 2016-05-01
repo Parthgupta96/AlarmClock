@@ -1,12 +1,8 @@
 package com.example.parth.alarmclock;
 
 import android.content.Context;
-
-import android.support.annotation.NonNull;
-
 import android.database.Cursor;
-
-import android.util.Log;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,7 +95,7 @@ private MainActivity main ;
             vh.alarmName.setText(alarm.getAlarmName());
         }
         vh.OnOff.setChecked(alarm.getIsActive());
-        Log.v("in alarm adapter", "is active: " + alarm.getIsActive());
+        //Log.v("in alarm adapter", "is active: " + alarm.getIsActive());
         vh.OnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
