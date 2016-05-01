@@ -2,15 +2,17 @@ package com.example.parth.alarmclock;
 
 import android.app.ActionBar;
 import android.app.ActivityManager;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -22,7 +24,15 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-public class AlarmAlert extends AppCompatActivity {
+public class AlarmAlertService extends Service {
+    public AlarmAlertService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 
     public MediaPlayer mediaPlayer;
     AudioManager am;
@@ -39,6 +49,13 @@ public class AlarmAlert extends AppCompatActivity {
     ColorStateList oldColors;
     Cursor cursor;
     AlarmDatabase alarmDatabase;
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
+        unlockScreen();
+        setContentView(R.layout.activity_alarm_alert);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +79,17 @@ public class AlarmAlert extends AppCompatActivity {
         actualAnswer = EvaluateString.evaluate(questionString);
         AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
+//// Request audio focus for playback
         int result = am.requestAudioFocus(focusChangeListener,
-               AudioManager.STREAM_MUSIC,
-               AudioManager.AUDIOFOCUS_GAIN);
+//// Use the music stream.
+                AudioManager.STREAM_MUSIC,
+//// Request permanent focus.
+                AudioManager.AUDIOFOCUS_GAIN);
+//
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+// other app had stopped playing song now , so u can do u stuff now .
+//        }
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.setLooping(true);
@@ -171,7 +194,7 @@ public class AlarmAlert extends AppCompatActivity {
             if(answerString.equals("")){
                 answer.setText("Answer");
             }else{
-            answer.setTextColor(oldColors);
+                answer.setTextColor(oldColors);
             }
         }
     }
@@ -201,6 +224,7 @@ public class AlarmAlert extends AppCompatActivity {
             vibrator.cancel();
         Log.v(LOG_TAG, "will now release");
         mediaPlayer.release();
+//        am.abandonAudioFocus(focusChangeListener);
         Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
         alarm.setIsActive(false);
         alarmDatabase.updateData(alarm);
@@ -248,25 +272,7 @@ public class AlarmAlert extends AppCompatActivity {
                     }
                 }
             };
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-            actionBar.setDisplayShowHomeEnabled(false); // remove the icon
-        }
-        return super.onCreateOptionsMenu(menu);
-
     }
+}
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        ActivityManager activityManager = (ActivityManager) getApplicationContext()
-                .getSystemService(Context.ACTIVITY_SERVICE);
-
-        activityManager.moveTaskToFront(getTaskId(), 0);
-    }
 }
