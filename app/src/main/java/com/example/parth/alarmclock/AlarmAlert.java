@@ -61,17 +61,11 @@ public class AlarmAlert extends AppCompatActivity {
         actualAnswer = EvaluateString.evaluate(questionString);
         AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-//// Request audio focus for playback
         int result = am.requestAudioFocus(focusChangeListener,
-//// Use the music stream.
                AudioManager.STREAM_MUSIC,
-//// Request permanent focus.
                AudioManager.AUDIOFOCUS_GAIN);
-//
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-// other app had stopped playing song now , so u can do u stuff now .
-//        }
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.setLooping(true);
@@ -208,6 +202,7 @@ public class AlarmAlert extends AppCompatActivity {
         mediaPlayer.release();
 //        am.abandonAudioFocus(focusChangeListener);
 //        Log.v(LOG_TAG, "id of ringing alarm: " + alarm.getAlarmId());
+
         alarm.setIsActive(false);
         alarmDatabase.updateData(alarm);
         cursor = alarmDatabase.sortQuery();
@@ -233,10 +228,10 @@ public class AlarmAlert extends AppCompatActivity {
 
                         case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) :
                             // Lower the volume while ducking.
-                            mediaPlayer.setVolume(0.2f, 0.2f);
+//                            mediaPlayer.setVolume(0.2f, 0.2f);
                             break;
                         case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) :
-                            mediaPlayer.pause();
+//                            mediaPlayer.pause();
                             break;
 
                         case (AudioManager.AUDIOFOCUS_LOSS) :
@@ -247,8 +242,8 @@ public class AlarmAlert extends AppCompatActivity {
 
                         case (AudioManager.AUDIOFOCUS_GAIN) :
                             // Return the volume to normal and resume if paused.
-                            mediaPlayer.setVolume(1f, 1f);
-                            mediaPlayer.start();
+//                            mediaPlayer.setVolume(1f, 1f);
+//                            mediaPlayer.start();
                             break;
                         default: break;
                     }
