@@ -4,7 +4,6 @@
     android:layout_height="match_parent">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -14,8 +13,6 @@
             style="@style/DialogTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
-            android:layout_centerHorizontal="true"
             android:orientation="vertical" />
 
 
@@ -23,19 +20,18 @@
             android:id="@+id/vibrateButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/timePicker"
             android:layout_margin="5dp"
-            android:text="Vibrate"
-            android:textOff="Off"
-            android:textOn="On" />
+            android:text="@string/label_vibrate"
+            android:textOff="@string/label_off"
+            android:textOn="@string/label_on" />
 
         <EditText
+            android:inputType="text"
             android:id="@+id/alarmName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/vibrateButton"
             android:singleLine="true"
-            android:hint="Alarm Label" />
+            android:hint="@string/label_alarm_label" />
 
         <LinearLayout
 
@@ -46,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Difficulty Level" />
+                android:text="@string/label_difficulty_level" />
 
             <Spinner
                 android:id="@+id/difficultyLevel"
@@ -59,14 +55,11 @@
             android:id="@+id/ringtonePathPicker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/alarmName"
-            android:onClick="ringtonePath"
-            android:text="Change Alarm Tone" />
+            android:text="@string/label_change_alarm_tone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ringtonePathPicker"
             android:orientation="horizontal">
 
             <Button
@@ -75,8 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:onClick="cancel"
-                android:text="Cancel" />
+                android:text="@string/label_cancel" />
 
             <Button
                 android:id="@+id/okButton"
@@ -84,8 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:onClick="addAlarm"
-                android:text="Ok" />
+                android:text="@string/label_ok" />
 
         </LinearLayout>
     </LinearLayout>

@@ -40,7 +40,7 @@ public class AlarmDatabase extends SQLiteOpenHelper {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_ISACTIVE,1);
-        contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate()==true?1:0));
+        contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate() ?1:0));
         contentValues.put(COLUMN_HOUR, alarm.getHour());
         contentValues.put(COLUMN_MIN, alarm.getMin());
         contentValues.put(COLUMN_ALARMNAME,alarm.getAlarmName());
@@ -71,8 +71,8 @@ public class AlarmDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
        // Log.v("in updateData ", "id: " + alarm.getAlarmId());
-        contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate()==true?1:0));
-        contentValues.put(COLUMN_ISACTIVE,(alarm.getIsActive()==true?1:0));
+        contentValues.put(COLUMN_ISVIBRATE,(alarm.getIsVibrate() ?1:0));
+        contentValues.put(COLUMN_ISACTIVE,(alarm.getIsActive() ?1:0));
         contentValues.put(COLUMN_HOUR,alarm.getHour());
         contentValues.put(COLUMN_MIN,alarm.getMin());
         contentValues.put(COLUMN_ALARMNAME,alarm.getAlarmName());

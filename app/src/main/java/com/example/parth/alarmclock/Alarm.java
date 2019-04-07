@@ -5,6 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 
@@ -21,8 +24,8 @@ public class Alarm implements Serializable {
     public final String LOG_TAG = Alarm.class.getSimpleName();
 
     private Calendar calendar;
-    private Boolean isActive = true;
-    private Boolean isVibrate = true;
+    private boolean isActive = true;
+    private boolean isVibrate = true;
     private int alarmId;
     private int hour;
     private int min;
@@ -35,12 +38,9 @@ public class Alarm implements Serializable {
     private int timeDifference[] = new int[2];
     private Difficulty difficulty = Difficulty.Easy;
 
-    Boolean getIsActive() {
-        return isActive;
-    }
 
-    void setIsActive(Boolean status) {
-        isActive = status;
+    boolean getIsActive() {
+        return isActive;
     }
 
     int getHour() {
@@ -59,7 +59,7 @@ public class Alarm implements Serializable {
         this.min = min;
     }
 
-    Boolean getIsVibrate() {
+    boolean getIsVibrate() {
         return isVibrate;
     }
 
@@ -137,9 +137,6 @@ public class Alarm implements Serializable {
         }
     }
 
-//    public void setCoordinatorLayout(CoordinatorLayout coordinatorLayout) {
-//        this.coordinatorLayout = coordinatorLayout;
-//    }
 
     void setMilliseconds(int hour, int min) {
 
@@ -194,37 +191,26 @@ public class Alarm implements Serializable {
     void scheduleAlarm(Context context, boolean schedule) {
         Intent myIntent = new Intent(context, AlarmReceiver.class);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        setCalendar(getHour(), getMin());
-        calcTimeDifference(getHour(), getMin());
-        myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        setCalendar(hour, min);
+        calcTimeDifference(hour, min);
+        myIntent.putExtra("alarm", Alarm.this);
+        myIntent.putExtra("alarm id", alarmId);
+        Bundle bundle = new Bundle();
+        bundle.putInt("alarm id", alarmId);
+        bundle.putSerializable("alarm", Alarm.this);
+        myIntent.putExtra("bundle",bundle);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,  0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (schedule) {
             //showSnackbar();
            // Log.v(LOG_TAG,"received context " + context);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
+            assert alarmManager != null;
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
         }else {
+            assert alarmManager != null;
             alarmManager.cancel(pendingIntent);
         }
 
-    }
-
-    void scheduleAlarm(Context context) {
-        showSnackbar();
-        Intent myIntent = new Intent(context, AlarmReceiver.class);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) this.getCalendar().getTimeInMillis(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, this.getCalendar().getTimeInMillis(), pendingIntent);
-    }
-
-    void cancelAlarm(Context context) {
-
-        Intent myIntent = new Intent(context, AlarmReceiver.class);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        myIntent.putExtra("alarm", this);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) this.getCalendar().getTimeInMillis(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        alarmManager.cancel(pendingIntent);
     }
 
     enum Difficulty {
@@ -246,4 +232,6 @@ public class Alarm implements Serializable {
         }
     }
 
+    public Alarm() {
+    }
 }

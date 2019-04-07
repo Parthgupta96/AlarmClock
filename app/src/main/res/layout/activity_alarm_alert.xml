@@ -11,7 +11,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:orientation="vertical"
-    tools:context="com.example.parth.alarmclock.AlarmAlert">
+    tools:context="com.example.parth.alarmclock.AlarmAlertActivity">
 
 
     <LinearLayout

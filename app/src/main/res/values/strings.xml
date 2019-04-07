@@ -5,4 +5,12 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_alarm_alert">AlarmAlert</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_ok">OK</string>
+    <string name="label_change_alarm_tone">Change Alarm Tone</string>
+    <string name="label_difficulty_level">Difficulty Level</string>
+    <string name="label_alarm_label">Alarm Label</string>
+    <string name="label_vibrate">Vibrate</string>
+    <string name="label_off">Off</string>
+    <string name="label_on">On</string>
 </resources>
