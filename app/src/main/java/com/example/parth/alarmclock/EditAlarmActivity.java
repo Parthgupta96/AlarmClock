@@ -33,7 +33,7 @@ import android.widget.TimePicker;
 
 import java.util.ArrayList;
 
-public class EditAlarm extends AppCompatActivity {
+public class EditAlarmActivity extends AppCompatActivity {
 
     static ArrayList<String> difficultyList;
     static ArrayAdapter<String> difficultyLevelAdapter;
@@ -77,7 +77,7 @@ public class EditAlarm extends AppCompatActivity {
             getWindow().setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.time_shared_transition));
             getWindow().setSharedElementExitTransition(null);
             getWindow().setSharedElementReturnTransition(null);
-            getWindow().setEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.edit_alarm_enter));
+//            getWindow().setEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.edit_alarm_enter));
             getWindow().setAllowReturnTransitionOverlap(false);
             getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.edit_alarm_exit));
 //   getWindow().setReturnTransition(null);
@@ -124,7 +124,7 @@ public class EditAlarm extends AppCompatActivity {
 
         if (oldAlarmLabel.equals("")) {
             AlarmLabel.setText(defaultLabel);
-            AlarmLabel.setTextColor(getResources().getColor(R.color.dim_foreground_disabled_material_light));
+            AlarmLabel.setTextColor(getResources().getColor(R.color.colorAccent));
 
         } else {
             AlarmLabel.setText(oldAlarmLabel);
@@ -137,9 +137,9 @@ public class EditAlarm extends AppCompatActivity {
         AlarmLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(EditAlarm.this);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(EditAlarmActivity.this);
                 dialog.setTitle("Alarm label");
-                final EditText label = new EditText(EditAlarm.this);
+                final EditText label = new EditText(EditAlarmActivity.this);
                 label.setText(oldAlarmLabel);
                 label.setSingleLine(true);
                 dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -170,7 +170,7 @@ public class EditAlarm extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                TimePickerDialog dialog = new TimePickerDialog(EditAlarm.this, new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog dialog = new TimePickerDialog(EditAlarmActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         newHour = hourOfDay;
@@ -313,7 +313,7 @@ public class EditAlarm extends AppCompatActivity {
     }
 
     public void showExitDialog() {
-        final AlertDialog.Builder exitConfirm = new AlertDialog.Builder(EditAlarm.this);
+        final AlertDialog.Builder exitConfirm = new AlertDialog.Builder(EditAlarmActivity.this);
         exitConfirm.setMessage("Save Changes ?");
 
         exitConfirm.setPositiveButton("Yes", new DialogInterface.OnClickListener() {

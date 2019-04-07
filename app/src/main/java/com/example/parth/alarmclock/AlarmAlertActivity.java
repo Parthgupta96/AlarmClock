@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -21,7 +22,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-public class AlarmAlert extends AppCompatActivity {
+public class AlarmAlertActivity extends AppCompatActivity {
 
     public MediaPlayer mediaPlayer;
     AudioManager am;
@@ -33,7 +34,7 @@ public class AlarmAlert extends AppCompatActivity {
     String questionString;
     String actualAnswer;
     String diff;
-    private final String LOG_TAG = AlarmAlert.class.getSimpleName();
+    private final String LOG_TAG = AlarmAlertActivity.class.getSimpleName();
     String answerString = "";
     ColorStateList oldColors;
     Cursor cursor;
@@ -42,7 +43,7 @@ public class AlarmAlert extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // Log.v(LOG_TAG, "in AlarmAlert");
+        Log.v(LOG_TAG, "in AlarmAlert");
         unlockScreen();
         setContentView(R.layout.activity_alarm_alert);
 
@@ -155,7 +156,7 @@ public class AlarmAlert extends AppCompatActivity {
             wrongAnsVibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
             wrongAnsVibrator.vibrate(500);
             answer.setTextColor(getResources().getColor(R.color.wrongAnswer));
-            Animation shake = AnimationUtils.loadAnimation(AlarmAlert.this, R.anim.shake);
+            Animation shake = AnimationUtils.loadAnimation(AlarmAlertActivity.this, R.anim.shake);
             answer.startAnimation(shake);
 
         }
